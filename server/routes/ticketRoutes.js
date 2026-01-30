@@ -1,0 +1,25 @@
+const express = require('express');
+const router = express.Router();
+const {
+    createTicket,
+    getTickets,
+    getTicketById,
+    updateTicket,
+    deleteTicket,
+    getTicketStatus
+} = require('../controllers/ticketController');
+const { protect } = require('../middleware/authMiddleware');
+const { optionalAuth } = require('../middleware/optionalAuth');
+
+router.get('/status/:id', getTicketStatus); // Ruta pública específica antes de /:id genérico
+
+router.route('/')
+    .get(protect, getTickets)
+    .post(optionalAuth, createTicket); // Público (el controlador maneja si hay user o no, pero necesitamos 'optional auth' middleware si queremos soportar ambos casos en la misma ruta, o simplemente no requerir auth)
+
+router.route('/:id')
+    .get(protect, getTicketById)
+    .put(protect, updateTicket)
+    .delete(protect, deleteTicket);
+
+module.exports = router;

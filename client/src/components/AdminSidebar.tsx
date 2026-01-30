@@ -1,0 +1,93 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from './ui/Button';
+
+export default function AdminSidebar() {
+    const pathname = usePathname();
+    const { user, logout } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleSidebar = () => setIsOpen(!isOpen);
+
+    const navigation = [
+        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, roles: ['admin', 'super_admin', 'agente'] },
+        { name: 'Tickets', href: '/admin/tickets', icon: Ticket, roles: ['admin', 'super_admin', 'agente'] },
+        // Solo super_admin ve usuarios
+        { name: 'Usuarios', href: '/admin/users', icon: Users, roles: ['super_admin'] },
+        { name: 'Categorías', href: '/admin/categories', icon: Files, roles: ['admin', 'super_admin'] },
+        { name: 'FAQs', href: '/admin/faqs', icon: HelpCircle, roles: ['admin', 'super_admin'] },
+        { name: 'Configuración', href: '/admin/settings', icon: Settings, roles: ['admin', 'super_admin'] },
+    ];
+
+    return (
+        <>
+            {/* Mobile Toggle */}
+            <div className="md:hidden flex items-center justify-between bg-blue-900 text-white p-4">
+                <span className="font-bold">Admin Panel</span>
+                <button onClick={toggleSidebar}>
+                    {isOpen ? <X /> : <Menu />}
+                </button>
+            </div>
+
+            <div className={`
+                fixed inset-y-0 left-0 bg-slate-900 text-white w-64 transform transition-transform duration-200 ease-in-out z-30
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:block
+            `}>
+                <div className="flex flex-col h-full">
+                    <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md">
+                        <h1 className="text-xl font-bold tracking-wider">Admin Panel</h1>
+                    </div>
+
+                    <nav className="flex-1 px-4 py-6 space-y-2">
+                        {navigation.map((item) => {
+                            // Filter by role
+                            if (user && !item.roles.includes(user.rol)) return null;
+
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`
+                                        flex items-center px-4 py-3 rounded-lg transition-colors
+                                        ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}
+                                    `}
+                                >
+                                    <item.icon className="h-5 w-5 mr-3" />
+                                    <span className="font-medium">{item.name}</span>
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    <div className="p-4 bg-slate-800">
+                        <div className="mb-4 px-2">
+                            <p className="text-sm font-semibold text-white">{user?.nombre}</p>
+                            <p className="text-xs text-slate-400 capitalize">{user?.rol?.replace('_', ' ')}</p>
+                        </div>
+                        <Button
+                            variant="secondary"
+                            className="w-full bg-slate-700 hover:bg-slate-600 text-white border-none"
+                            onClick={logout}
+                        >
+                            Cerrar Sesión
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Overlay for mobile */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-20"
+                    onClick={toggleSidebar}
+                ></div>
+            )}
+        </>
+    );
+}
