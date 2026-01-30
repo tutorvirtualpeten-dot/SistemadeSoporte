@@ -48,3 +48,17 @@ El sistema no tiene usuarios por defecto.
 
 - **Portal de Usuario**: Crear tickets, ver historial, comentar.
 - **Admin**: Dashboard de métricas, gestión de usuarios (técnicos), configuración global.
+
+## Actualizaciones Recientes (Enero 2026)
+
+### Correcciones Móviles y Admin
+- **Acceso Móvil**: Se habilitó el acceso desde dispositivos móviles configurando `NEXT_PUBLIC_API_URL`.
+- **Panel Admin Responsivo**: 
+    - Se arregló el menú lateral en móviles.
+    - Se añadió desplazamiento horizontal (scroll) en tablas de Tickets, Usuarios, Categorías y FAQs.
+    - Se mejoró la fluidez del scroll y barras de desplazamiento.
+
+### Sincronización y Despliegue
+- **GitHub**: Repositorio configurado en `https://github.com/tutorvirtualpeten-dot/SistemadeSoporte`.
+- **Sincronización Automática**: Ejecuta el archivo `sincronizar.bat` para guardar y subir cambios a la nube con un solo clic.
+- **Despliegue en la Nube**: Consulta la `Guía de Despliegue.md` (o deployment_guide.md si se generó) para subir el proyecto a Vercel y Render (Hosting Gratis).
