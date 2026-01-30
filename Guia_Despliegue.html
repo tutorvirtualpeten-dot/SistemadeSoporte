@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Guía de Despliegue - Soporte Petén</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; color: #333; }
+        h1 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        h2 { color: #1e40af; margin-top: 30px; }
+        code { background: #f3f4f6; padding: 2px 5px; border-radius: 4px; font-family: Consolas, monospace; color: #d97706; }
+        pre { background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .note { background: #eff6ff; border-left: 4px solid #2563eb; padding: 10px; margin: 10px 0; }
+        ul, ol { margin-left: 20px; }
+        li { margin-bottom: 8px; }
+        @media print {
+            body { padding: 0; }
+            a { text-decoration: none; color: #000; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Guía de Despliegue en la Nube (Gratis)</h1>
+    <p>Esta guía te ayudará a subir el sistema <strong>Soporte Petén</strong> a internet utilizando servicios gratuitos de alta calidad.</p>
+
+    <div class="note">
+        <strong>Arquitectura:</strong><br>
+        Base de Datos: <strong>MongoDB Atlas</strong><br>
+        Backend: <strong>Render.com</strong><br>
+        Frontend: <strong>Vercel</strong>
+    </div>
+
+    <h2>Paso 1: Base de Datos (MongoDB Atlas)</h2>
+    <ol>
+        <li>Ve a <a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a> y crea una cuenta gratuita.</li>
+        <li>Crea un <strong>Cluster</strong> (elige la opción "FREE").</li>
+        <li>En <strong>Database Access</strong>, crea un usuario (ej: <code>admin</code>) y una contraseña segura.</li>
+        <li>En <strong>Network Access</strong>, agrega la IP <code>0.0.0.0/0</code> (permite acceso global).</li>
+        <li>Ve a <strong>Database</strong> &rarr; <strong>Connect</strong> &rarr; <strong>Drivers</strong>.</li>
+        <li>Copia tu <strong>Connection String</strong>. Se verá similar a:<br>
+            <code>mongodb+srv://admin:password@cluster0.mongodb.net/?retryWrites=true&w=majority</code>
+        </li>
+    </ol>
+
+    <h2>Paso 2: Backend (Render)</h2>
+    <ol>
+        <li>Crea una cuenta en <a href="https://render.com">render.com</a> y conéctala con GitHub.</li>
+        <li>Haz clic en <strong>New +</strong> y selecciona <strong>Web Service</strong>.</li>
+        <li>Selecciona el repositorio <code>SistemadeSoporte</code>.</li>
+        <li>Configura:
+            <ul>
+                <li><strong>Root Directory:</strong> <code>server</code></li>
+                <li><strong>Build Command:</strong> <code>npm install</code></li>
+                <li><strong>Start Command:</strong> <code>node index.js</code></li>
+            </ul>
+        </li>
+        <li>En <strong>Environment Variables</strong>, añade:
+            <ul>
+                <li><code>MONGODB_URI</code>: (Tu cadena de conexión del Paso 1)</li>
+                <li><code>JWT_SECRET</code>: (Una contraseña secreta cualquiera)</li>
+            </ul>
+        </li>
+        <li>Haz clic en <strong>Create Web Service</strong>. Copia la URL resultante (ej: <code>https://api.onrender.com</code>).</li>
+    </ol>
+
+    <h2>Paso 3: Frontend (Vercel)</h2>
+    <ol>
+        <li>Crea una cuenta en <a href="https://vercel.com">vercel.com</a> y conecta GitHub.</li>
+        <li>Haz clic en <strong>Add New</strong> &rarr; <strong>Project</strong>.</li>
+        <li>Importa <code>SistemadeSoporte</code>.</li>
+        <li>En <strong>Root Directory</strong>, edita y selecciona la carpeta <code>client</code>.</li>
+        <li>En <strong>Environment Variables</strong>, añade:
+            <ul>
+                <li><code>NEXT_PUBLIC_API_URL</code>: <code>https://tu-api.onrender.com/api</code><br>
+                <em>(La URL de Render + /api al final)</em></li>
+            </ul>
+        </li>
+        <li>Haz clic en <strong>Deploy</strong>.</li>
+    </ol>
+
+    <h2>¡Listo!</h2>
+    <p>Vercel te dará el enlace final de tu sitio web.</p>
+
+    <center style="margin-top:50px; color: #666; font-size: 0.9em;">
+        Guía generada para Soporte Petén
+    </center>
+</body>
+</html>
