@@ -7,8 +7,31 @@ import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 function RegisterForm() {
+    const router = useRouter();
+
+    useEffect(() => {
+        router.push('/auth/login');
+    }, [router]);
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+                <h2 className="text-xl font-bold text-gray-900">Registro Deshabilitado</h2>
+                <p className="mt-2 text-gray-600">Redirigiendo al inicio de sesión...</p>
+            </div>
+        </div>
+    );
+}
+
+/* Original code commented out
+function RegisterFormOld() {
+    const { login } = useAuth();
+    // ... rest of the code
+*/
+function RegisterFormOld() {
     const { login } = useAuth();
     const searchParams = useSearchParams();
 
