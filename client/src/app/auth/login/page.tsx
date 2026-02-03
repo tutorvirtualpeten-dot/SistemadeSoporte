@@ -81,11 +81,6 @@ export default function LoginPage() {
                                 ¿Olvidaste tu contraseña?
                             </a>
                         </div>
-                        <div className="text-sm">
-                            <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
-                                ¿No tienes cuenta? Regístrate
-                            </Link>
-                        </div>
                     </div>
 
                     {error && (

@@ -16,7 +16,12 @@ app.use(express.json());
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/soporte_peten_db';
 
 mongoose.connect(MONGODB_URI)
-    .then(() => console.log('✅ Conectado a MongoDB'))
+    .then(async () => {
+        console.log('✅ Conectado a MongoDB');
+        // Crear admin por defecto si no existe
+        const seedAdmin = require('./seed');
+        await seedAdmin();
+    })
     .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 
 // Routes
