@@ -6,7 +6,6 @@ const {
     getTicketById,
     updateTicket,
     deleteTicket,
-    deleteTicket,
     getTicketStatus,
     addPublicComment,
     rateTicket
