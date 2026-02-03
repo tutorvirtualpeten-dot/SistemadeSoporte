@@ -8,6 +8,9 @@ interface User {
     _id: string;
     nombre: string;
     rol: 'agente' | 'admin' | 'super_admin';
+    email?: string;
+    telefono?: string;
+    dpi?: string;
 }
 
 interface AuthContextType {

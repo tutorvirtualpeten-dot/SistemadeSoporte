@@ -123,7 +123,7 @@ export default function TicketDetailPage() {
     const isAdmin = user?.rol === 'admin' || user?.rol === 'super_admin';
     const canEdit = ticket.estado !== 'cerrado' && (
         isAdmin ||
-        (ticket.usuario_id && ticket.usuario_id._id === user?.id)
+        (ticket.usuario_id && ticket.usuario_id._id === user?._id)
     );
 
     return (
@@ -161,7 +161,7 @@ export default function TicketDetailPage() {
                     </div>
 
                     {canEdit && !isEditing && (
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                             <Edit2 className="h-4 w-4 text-gray-500" />
                         </Button>
                     )}
