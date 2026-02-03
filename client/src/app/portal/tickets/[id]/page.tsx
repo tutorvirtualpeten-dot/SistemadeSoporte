@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import CommentSection from '@/components/CommentSection';
 import { Button } from '@/components/ui/Button';
-import { ArrowLeft, Edit2, Save, X } from 'lucide-react';
+import { ArrowLeft, Edit2, Save, X, Star } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/context/AuthContext';
 
@@ -21,6 +21,8 @@ interface Ticket {
     datos_contacto?: { nombre_completo: string; telefono: string; dpi: string; email: string };
     archivo_adjunto?: string;
     agente_id?: { _id: string; nombre: string; email: string };
+    calificacion?: number;
+    mensaje_resolucion?: string;
 }
 
 interface Agent {
@@ -303,6 +305,27 @@ export default function TicketDetailPage() {
                             </div>
                         )}
                     </dl>
+                )}
+
+                {/* Feedback del Usuario (Solo si existe) */}
+                {ticket.calificacion && (
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 m-6">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-yellow-800">
+                                    Calificación del Usuario: {ticket.calificacion} / 5
+                                </h3>
+                                {ticket.mensaje_resolucion && (
+                                    <div className="mt-2 text-sm text-yellow-700">
+                                        <p>"{ticket.mensaje_resolucion}"</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 <div className="border-t border-gray-200 mt-8 pt-8">

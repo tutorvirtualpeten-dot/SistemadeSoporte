@@ -82,13 +82,13 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <div className="flex flex-col items-center justify-end space-y-2">
+                    {/* <div className="flex flex-col items-center justify-end space-y-2">
                         <div className="text-sm">
-                            <a href="mailto:admin@soporte.com?subject=Restablecer contraseña" className="font-medium text-blue-600 hover:text-blue-500">
+                            <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
                                 ¿Olvidaste tu contraseña?
                             </a>
                         </div>
-                    </div>
+                    </div> */}
 
                     {error && (
                         <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
