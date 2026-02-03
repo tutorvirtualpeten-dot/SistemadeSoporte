@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
@@ -10,6 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
     const { login } = useAuth();
+    const { settings } = useSettings();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -47,9 +49,14 @@ export default function LoginPage() {
             </div>
 
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-                <div>
+                <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                    {settings.logo_url && (
+                        <div className="flex justify-center mb-4">
+                            <img src={settings.logo_url} alt="Logo" className="h-20 w-auto" />
+                        </div>
+                    )}
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
-                        Soporte Petén
+                        {settings.nombre_app || 'Soporte Petén'}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
                         Acceso para Personal de Soporte

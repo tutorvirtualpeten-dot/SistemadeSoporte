@@ -1,11 +1,13 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
     const { user, logout } = useAuth();
+    const { settings } = useSettings();
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -14,7 +16,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <Link href="/portal" className="flex-shrink-0 flex items-center font-bold text-xl text-blue-600">
-                                Soporte Petén
+                                {settings.logo_url ? <img src={settings.logo_url} alt="Logo" className="h-8 w-auto mr-2" /> : null}
+                                <span className={settings.logo_url ? "hidden sm:inline" : ""}>
+                                    {settings.nombre_app || 'Soporte Petén'}
+                                </span>
                             </Link>
                             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                                 {!['admin', 'super_admin'].includes(user?.rol || '') && (

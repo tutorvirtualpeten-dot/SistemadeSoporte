@@ -5,11 +5,13 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { Button } from './ui/Button';
 
 export default function AdminSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const { settings } = useSettings(); // Use settings context
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleSidebar = () => setIsOpen(!isOpen);
@@ -28,7 +30,11 @@ export default function AdminSidebar() {
         <>
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center justify-between bg-blue-900 text-white p-4">
-                <span className="font-bold">Admin Panel</span>
+                {settings.logo_url ? (
+                    <img src={settings.logo_url} alt="Logo" className="h-8 w-auto mix-blend-lighten" />
+                ) : (
+                    <span className="font-bold">{settings.nombre_app || 'Admin Panel'}</span>
+                )}
                 <button onClick={toggleSidebar}>
                     {isOpen ? <X /> : <Menu />}
                 </button>
@@ -39,8 +45,12 @@ export default function AdminSidebar() {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:block
             `}>
                 <div className="flex flex-col h-full">
-                    <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md">
-                        <h1 className="text-xl font-bold tracking-wider">Admin Panel</h1>
+                    <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
+                        {settings.logo_url ? (
+                            <img src={settings.logo_url} alt="Logo" className="h-10 max-w-full object-contain" />
+                        ) : (
+                            <h1 className="text-xl font-bold tracking-wider truncate">{settings.nombre_app || 'Admin Panel'}</h1>
+                        )}
                     </div>
 
                     <nav className="flex-1 px-4 py-6 space-y-2">
