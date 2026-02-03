@@ -240,9 +240,76 @@ exports.getTicketStatus = async (req, res) => {
             return res.status(404).json({ message: 'Ticket no encontrado' });
         }
 
-        res.json(ticket);
+        if (ticket.estado === 'cerrado') {
+            return res.status(403).json({ message: 'Este caso ya ha sido cerrado definitivamente.' });
+        }
+
+        // Obtener comentarios también
+        const Comment = require('../models/Comment');
+        const comments = await Comment.find({ ticket_id: ticket._id }).sort({ fecha: 1 }).populate('usuario_id', 'nombre');
+
+        res.json({ ...ticket.toObject(), comments });
     } catch (error) {
         res.status(500).json({ message: 'Error al consultar ticket.' });
+    }
+};
+
+// @desc    Agregar comentario público
+// @route   POST /api/tickets/public/comment/:id
+// @access  Public
+exports.addPublicComment = async (req, res) => {
+    try {
+        const { texto } = req.body;
+        const ticketId = parseInt(req.params.id);
+
+        const ticket = await Ticket.findOne({ ticket_id: ticketId });
+        if (!ticket) return res.status(404).json({ message: 'Ticket no encontrado' });
+
+        if (ticket.estado === 'cerrado') {
+            return res.status(400).json({ message: 'No se puede comentar en un ticket cerrado.' });
+        }
+
+        const Comment = require('../models/Comment');
+        const comment = await Comment.create({
+            ticket_id: ticket._id,
+            texto,
+            es_publico: true,
+            // Sin usuario_id porque es público (podríamos poner un placeholder o dejarlo null)
+        });
+
+        // Notificar al Agente o Admin
+        const Notification = require('../models/Notification');
+        // ... Lógica de notificación simplificada ...
+
+        res.json(comment);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Calificar y Cerrar Ticket
+// @route   PUT /api/tickets/public/rate/:id
+// @access  Public
+exports.rateTicket = async (req, res) => {
+    try {
+        const { rating, feedback } = req.body;
+        const ticketId = parseInt(req.params.id);
+
+        const ticket = await Ticket.findOne({ ticket_id: ticketId });
+        if (!ticket) return res.status(404).json({ message: 'Ticket no encontrado' });
+
+        if (ticket.estado !== 'resuelto') {
+            return res.status(400).json({ message: 'Solo se pueden calificar tickets resueltos.' });
+        }
+
+        ticket.calificacion = rating;
+        ticket.mensaje_resolucion = feedback;
+        ticket.estado = 'cerrado'; // Cierre definitivo
+        await ticket.save();
+
+        res.json({ message: 'Ticket calificado y cerrado correctamente.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
 

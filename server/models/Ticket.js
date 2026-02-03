@@ -58,6 +58,14 @@ const ticketSchema = new mongoose.Schema({
     fecha_actualizacion: {
         type: Date,
         default: Date.now
+    },
+    calificacion: {
+        type: Number,
+        min: 1,
+        max: 5
+    },
+    mensaje_resolucion: { // Mensaje opcional del usuario al cerrar
+        type: String
     }
 });
 
