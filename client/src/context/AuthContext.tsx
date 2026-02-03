@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 interface User {
     _id: string;
     nombre: string;
-    rol: 'agente' | 'admin' | 'super_admin';
+    rol: string;
     email?: string;
     telefono?: string;
     dpi?: string;

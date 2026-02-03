@@ -245,7 +245,7 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
                     />
                 </div>
 
-                {(formData.rol === 'administrativo' || user?.rol === 'administrativo') && (
+                {(formData.rol === 'administrativo' || (user?.rol as string) === 'administrativo') && (
                     <div className="sm:col-span-2">
                         <Input
                             label="Archivo Adjunto (URL)"
