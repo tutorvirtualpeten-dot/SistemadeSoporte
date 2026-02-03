@@ -5,6 +5,8 @@ import { useSettings } from '@/context/SettingsContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
+import NotificationBell from '@/components/NotificationBell';
+
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
     const { user, logout } = useAuth();
     const { settings } = useSettings();
@@ -38,6 +40,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                             </div>
                         </div>
                         <div className="flex items-center">
+                            <div className="mr-4">
+                                <NotificationBell />
+                            </div>
                             <span className="text-gray-700 text-sm mr-4">Hola, {user?.nombre}</span>
                             <Button variant="secondary" onClick={logout} className="text-xs">
                                 Salir

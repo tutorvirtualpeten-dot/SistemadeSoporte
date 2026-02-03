@@ -32,6 +32,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
 app.use('/api/faqs', require('./routes/faqRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 
 

@@ -1,6 +1,7 @@
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const sendEmail = require('../utils/emailService');
+const Notification = require('../models/Notification');
 
 // @desc    Crear nuevo ticket
 // @route   POST /api/tickets
@@ -44,6 +45,19 @@ exports.createTicket = async (req, res) => {
             const text = `Hola, hemos recibido tu solicitud: "${titulo}". ID: ${nuevoTicket.ticket_id}. Puedes consultar el estado en el portal.`;
             // Call async but don't await to not block response, catch error locally
             sendEmail({ to: emailUsuario, subject, text }).catch(err => console.error('Error enviando email nuevo ticket:', err.message));
+        }
+
+        // NOTIFICACIÓN INTERNA (Admins/Agentes)
+        const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
+        const notificacionesAdmins = admins.map(admin => ({
+            recipient_id: admin._id,
+            type: 'ticket_new',
+            title: `Nuevo Ticket #${nuevoTicket.ticket_id}`,
+            message: `${nuevoTicket.datos_contacto?.nombre_completo || 'Usuario'} ha creado: "${titulo}"`,
+            link: `/portal/tickets/${nuevoTicket._id}` // Link para admin
+        }));
+        if (notificacionesAdmins.length > 0) {
+            await Notification.insertMany(notificacionesAdmins);
         }
 
         res.status(201).json(nuevoTicket);
@@ -165,6 +179,17 @@ exports.updateTicket = async (req, res) => {
                     text: `El estado de tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}.`
                 });
             }
+
+            // Notifiación Interna al Usuario (si no fue él quien lo cambió)
+            if (actualizado.usuario_id && req.user.id !== actualizado.usuario_id._id.toString()) {
+                await Notification.create({
+                    recipient_id: actualizado.usuario_id._id,
+                    type: 'ticket_update',
+                    title: `Actualización #${actualizado.ticket_id}`,
+                    message: `Tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}`,
+                    link: `/portal/tickets/${actualizado._id}`
+                });
+            }
         }
 
         // 2. Asignación de Agente -> Notificar al Agente
@@ -180,6 +205,15 @@ exports.updateTicket = async (req, res) => {
                     text: `Se te ha asignado el ticket "${actualizado.titulo}". Por favor revísalo en el panel.`
                 });
             }
+
+            // Notificación Interna al Nuevo Agente
+            await Notification.create({
+                recipient_id: newAgentId,
+                type: 'ticket_assigned',
+                title: `Ticket Asignado #${actualizado.ticket_id}`,
+                message: `Se te ha asignado el ticket: "${actualizado.titulo}"`,
+                link: `/portal/tickets/${actualizado._id}`
+            });
         }
 
         res.json(actualizado);
