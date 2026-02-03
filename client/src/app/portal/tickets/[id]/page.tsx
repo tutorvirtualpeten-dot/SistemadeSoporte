@@ -154,11 +154,43 @@ export default function TicketDetailPage() {
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <div className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${ticket.estado === 'abierto' ? 'bg-green-100 text-green-800' :
-                            ticket.estado === 'cerrado' ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {ticket.estado.toUpperCase()}
-                    </div>
+                    {/* Selector de Estado (Solo Admins/Agentes) */}
+                    {(user?.rol === 'admin' || user?.rol === 'super_admin' || user?.rol === 'agente') ? (
+                        <select
+                            value={ticket.estado}
+                            onChange={async (e) => {
+                                const newStatus = e.target.value;
+                                if (!ticket) return;
+                                try {
+                                    const { data } = await api.put(`/tickets/${ticket._id}`, { estado: newStatus });
+                                    setTicket(data);
+                                    alert(`Estado actualizado a: ${newStatus.toUpperCase()}`);
+                                } catch (error) {
+                                    console.error(error);
+                                    alert('Error actualizando estado');
+                                }
+                            }}
+                            className={`text-xs font-bold rounded-full px-3 py-1 border-0 cursor-pointer focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                                ${ticket.estado === 'abierto' ? 'bg-green-100 text-green-800' :
+                                    ticket.estado === 'cerrado' ? 'bg-gray-100 text-gray-800' :
+                                        ticket.estado === 'resuelto' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-yellow-100 text-yellow-800'}`
+                            }
+                        >
+                            <option value="abierto">ABIERTO</option>
+                            <option value="en_progreso">EN PROGRESO</option>
+                            <option value="resuelto">RESUELTO</option>
+                            <option value="cerrado">CERRADO</option>
+                        </select>
+                    ) : (
+                        <div className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${ticket.estado === 'abierto' ? 'bg-green-100 text-green-800' :
+                                ticket.estado === 'cerrado' ? 'bg-gray-100 text-gray-800' :
+                                    ticket.estado === 'resuelto' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800'}`}>
+                            {ticket.estado.toUpperCase()}
+                        </div>
+                    )}
 
                     {canEdit && !isEditing && (
                         <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
