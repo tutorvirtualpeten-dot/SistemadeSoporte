@@ -75,11 +75,16 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <div className="flex items-center justify-end">
+                    <div className="flex flex-col items-center justify-end space-y-2">
                         <div className="text-sm">
                             <a href="mailto:admin@soporte.com?subject=Restablecer contraseña" className="font-medium text-blue-600 hover:text-blue-500">
                                 ¿Olvidaste tu contraseña?
                             </a>
+                        </div>
+                        <div className="text-sm">
+                            <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
+                                ¿No tienes cuenta? Regístrate
+                            </Link>
                         </div>
                     </div>
 
