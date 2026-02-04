@@ -14,11 +14,13 @@ exports.addComment = async (req, res) => {
         }
 
         // Validación seguridad: Solo participantes o admin pueden comentar
-        if (
-            ticket.usuario_id.toString() !== req.user.id &&
-            ticket.agente_id?.toString() !== req.user.id &&
-            req.user.rol !== 'admin'
-        ) {
+        const userId = req.user.id;
+        // Uso de ?.toString() para evitar crash si es null
+        const isOwner = ticket.usuario_id?.toString() === userId;
+        const isAgent = ticket.agente_id?.toString() === userId;
+        const isAdmin = req.user.rol === 'admin';
+
+        if (!isOwner && !isAgent && !isAdmin) {
             return res.status(401).json({ message: 'No autorizado para comentar en este ticket' });
         }
 

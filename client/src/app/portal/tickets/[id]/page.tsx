@@ -23,6 +23,8 @@ interface Ticket {
     agente_id?: { _id: string; nombre: string; email: string };
     calificacion?: number;
     mensaje_resolucion?: string;
+    categoria_id?: { _id: string; nombre: string };
+    tipo_usuario?: string;
 }
 
 interface Agent {
@@ -284,7 +286,21 @@ export default function TicketDetailPage() {
                         </div>
                         <div className="sm:col-span-1">
                             <dt className="text-sm font-medium text-gray-500">DPI</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{ticket.datos_contacto?.dpi}</dd>
+                            <dd className="mt-1 text-sm text-gray-900">{ticket.datos_contacto?.dpi || '-'}</dd>
+                        </div>
+
+                        <div className="sm:col-span-1">
+                            <dt className="text-sm font-medium text-gray-500">Tipo de Usuario</dt>
+                            <dd className="mt-1 text-sm text-gray-900 capitalize px-2 py-0.5 rounded bg-gray-100 inline-block font-medium">
+                                {ticket.tipo_usuario || 'No especificado'}
+                            </dd>
+                        </div>
+
+                        <div className="sm:col-span-1">
+                            <dt className="text-sm font-medium text-gray-500">Categoría</dt>
+                            <dd className="mt-1 text-sm text-gray-900 font-medium">
+                                {ticket.categoria_id?.nombre || 'General'}
+                            </dd>
                         </div>
 
                         <div className="sm:col-span-2">
