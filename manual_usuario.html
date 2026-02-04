@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Usuario - SoportePeten</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #eff6ff;
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 2rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+            color: var(--text-main);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin: 1.5rem 0 0.5rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        ul,
+        ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Images */
+        /* Images (Removed) */
+        /* .img-container style removed */
+
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .img-caption {
+            padding: 0.75rem;
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Helper Classes */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-user {
+            background: #dbf4ff;
+            color: #075985;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+                /* Simplification for this single file example */
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <h1>SoportePeten</h1>
+        <ul class="nav-links">
+            <li class="nav-item"><a href="#intro" class="nav-link">1. Introducción</a></li>
+            <li class="nav-item"><a href="#public" class="nav-link">2. Interfaz Pública</a></li>
+            <li class="nav-item"><a href="#request" class="nav-link">&nbsp;&nbsp;Crear Solicitud</a></li>
+            <li class="nav-item"><a href="#track" class="nav-link">&nbsp;&nbsp;Consultar Estado</a></li>
+            <li class="nav-item"><a href="#admin" class="nav-link">3. Panel de Administración</a></li>
+            <li class="nav-item"><a href="#dashboard" class="nav-link">&nbsp;&nbsp;Dashboard</a></li>
+            <li class="nav-item"><a href="#tickets" class="nav-link">&nbsp;&nbsp;Gestión de Tickets</a></li>
+            <li class="nav-item"><a href="#users" class="nav-link">&nbsp;&nbsp;Usuarios</a></li>
+            <li class="nav-item"><a href="#settings" class="nav-link">&nbsp;&nbsp;Configuración</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Introducción -->
+        <section id="intro">
+            <h2>1. Introducción</h2>
+            <p>Bienvenido al manual de usuario de <strong>SoportePeten</strong>. Este sistema está diseñado para
+                facilitar la gestión de solicitudes de soporte técnico, incidentes y requerimientos de manera eficiente.
+            </p>
+            <p>El sistema cuenta con dos áreas principales:</p>
+            <ul>
+                <li><strong>Área Pública:</strong> Donde cualquier usuario puede registrar tickets y consultar su
+                    estado.</li>
+                <li><strong>Panel de Administración:</strong> Exclusivo para el personal de soporte y administradores
+                    para gestionar y resolver los tickets.</li>
+            </ul>
+        </section>
+
+        <!-- Interfaz Pública -->
+        <section id="public">
+            <h2>2. Interfaz Pública</h2>
+            <p>Al acceder al sitio web, los usuarios encontrarán la página principal que ofrece acceso rápido a opciones
+                comunes y preguntas frecuentes (FAQ).</p>
+
+
+
+            <h3 id="request">Crear Nueva Solicitud</h3>
+            <p>Para reportar un problema, haga clic en el botón <strong>"Crear Solicitud"</strong> o navegue a la
+                sección correspondiente.</p>
+            <ol>
+                <li>Complete el formulario con su información de contacto (Nombre, Correo).</li>
+                <li>Seleccione la <strong>Categoría</strong> del problema.</li>
+                <li>Describa detalladamente el incidente en el campo de descripción.</li>
+                <li>(Opcional) Adjunte imágenes o archivos relevantes.</li>
+                <li>Haga clic en <strong>Enviar</strong>.</li>
+            </ol>
+
+
+            <h3 id="track">Consultar Estado de Solicitud</h3>
+            <p>Para ver el progreso de su caso, vaya a <strong>"Consultar Estado"</strong>.</p>
+            <p>Ingrese el número de ticket (ID) que recibió por correo electrónico. El sistema le mostrará el estado
+                actual (Pendiente, En Proceso, Resuelto) y cualquier comentario del agente. Además, podrá calificar el
+                servicio una vez finalizado.</p>
+
+        </section>
+
+        <!-- Panel de Administración -->
+        <section id="admin">
+            <h2>3. Panel de Administración <span class="badge badge-admin">Admin</span></h2>
+            <p>Esta sección es exclusiva para el personal autorizado. Se accede mediante usuario y contraseña.</p>
+
+            <h3 id="dashboard">Dashboard</h3>
+            <p>El Dashboard ofrece una vista general del rendimiento del soporte. Incluye métricas clave como:</p>
+            <ul>
+                <li>Total de tickets pendientes y resueltos.</li>
+                <li>Tiempos promedio de respuesta.</li>
+                <li>Gráficos de tickets por categoría.</li>
+            </ul>
+
+
+            <h3 id="tickets">Gestión de Tickets</h3>
+            <p>En la sección de tickets, los agentes pueden ver una lista de todas las solicitudes. Al entrar en un
+                ticket específico, es posible:</p>
+            <ul>
+                <li><strong>Cambiar Estado:</strong> Actualizar a "En Proceso" o "Resuelto".</li>
+                <li><strong>Asignar Agente:</strong> Delegar el ticket a un miembro del equipo.</li>
+                <li><strong>Responder:</strong> Enviar mensajes al usuario final (se notificará por correo).</li>
+                <li><strong>Notas Internas:</strong> Dejar comentarios solo visibles para otros agentes.</li>
+            </ul>
+
+
+            <h3 id="users">Gestión de Usuarios</h3>
+            <p>Los administradores pueden gestionar las cuentas del personal:</p>
+            <ul>
+                <li>Crear nuevos usuarios (Agentes o Administradores).</li>
+                <li>Editar información o restablecer contraseñas.</li>
+                <li>Desactivar cuentas.</li>
+            </ul>
+
+            <h3 id="settings">Configuración del Sistema</h3>
+            <p>Permite personalizar aspectos globales de la plataforma:</p>
+            <ul>
+                <li><strong>Categorías:</strong> Añadir o editar los tipos de problemas que los usuarios pueden
+                    reportar.</li>
+                <li><strong>Notificaciones:</strong> Configurar plantillas de correo.</li>
+                <li><strong>General:</strong> Nombre del sitio, logo y otros ajustes visuales.</li>
+            </ul>
+
+        </section>
+
+    </main>
+
+    <script>
+        // Simple script to highlight active section in sidebar
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
