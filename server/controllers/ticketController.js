@@ -38,14 +38,15 @@ exports.createTicket = async (req, res) => {
             archivo_adjunto
         });
 
-        // NOTIFICACIÓN POR CORREO (Usuario)
+        // NOTIFICACIÓN POR CORREO (Usuario) - DESHABILITADO POR SOLICITUD
+        /*
         const emailUsuario = req.user ? req.user.email : datos_contacto?.email;
         if (emailUsuario) {
             const subject = `Ticket Recibido: #${nuevoTicket.ticket_id}`;
             const text = `Hola, hemos recibido tu solicitud: "${titulo}". ID: ${nuevoTicket.ticket_id}. Puedes consultar el estado en el portal.`;
-            // Call async but don't await to not block response, catch error locally
             sendEmail({ to: emailUsuario, subject, text }).catch(err => console.error('Error enviando email nuevo ticket:', err.message));
         }
+        */
 
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
         const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
@@ -170,56 +171,60 @@ exports.updateTicket = async (req, res) => {
 
         // NOTIFICACIONES
         // 1. Cambio de Estado -> Notificar al Dueño
-        if (req.body.estado && req.body.estado !== ticket.estado) {
-            const distEmail = actualizado.usuario_id?.email || actualizado.datos_contacto?.email;
-            if (distEmail) {
-                sendEmail({
-                    to: distEmail,
-                    subject: `Actualización de Ticket #${actualizado.ticket_id}`,
-                    text: `El estado de tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}.`
-                }).catch(err => console.error('Error enviando email notificación usuario:', err.message));
-            }
-
-            // Notifiación Interna al Usuario (si no fue él quien lo cambió)
-            if (actualizado.usuario_id && req.user.id !== actualizado.usuario_id._id.toString()) {
-                await Notification.create({
-                    recipient_id: actualizado.usuario_id._id,
-                    type: 'ticket_update',
-                    title: `Actualización #${actualizado.ticket_id}`,
-                    message: `Tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}`,
-                    link: `/portal/tickets/${actualizado._id}`
-                });
-            }
+        // 1. Cambio de Estado -> Notificar al Dueño (DESHABILITADO)
+        /*
+        if (distEmail) {
+            sendEmail({
+                to: distEmail,
+                subject: `Actualización de Ticket #${actualizado.ticket_id}`,
+                text: `El estado de tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}.`
+            }).catch(err => console.error('Error enviando email notificación usuario:', err.message));
         }
+        */
+
+        // Notifiación Interna al Usuario (si no fue él quien lo cambió)
+        if (actualizado.usuario_id && req.user.id !== actualizado.usuario_id._id.toString()) {
+            await Notification.create({
+                recipient_id: actualizado.usuario_id._id,
+                type: 'ticket_update',
+                title: `Actualización #${actualizado.ticket_id}`,
+                message: `Tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}`,
+                link: `/portal/tickets/${actualizado._id}`
+            });
+        }
+    }
 
         // 2. Asignación de Agente -> Notificar al Agente
         // Detectar si cambió el agente (comparando IDs)
         const oldAgentId = ticket.agente_id ? ticket.agente_id.toString() : null;
-        const newAgentId = actualizado.agente_id ? actualizado.agente_id._id.toString() : null;
+    const newAgentId = actualizado.agente_id ? actualizado.agente_id._id.toString() : null;
 
-        if (newAgentId && newAgentId !== oldAgentId) {
-            if (actualizado.agente_id && actualizado.agente_id.email) {
-                sendEmail({
-                    to: actualizado.agente_id.email,
-                    subject: `Nuevo Ticket Asignado: #${actualizado.ticket_id}`,
-                    text: `Se te ha asignado el ticket "${actualizado.titulo}". Por favor revísalo en el panel.`
-                }).catch(err => console.error('Error enviando email notificación agente:', err.message));
-            }
-
-            // Notificación Interna al Nuevo Agente
-            await Notification.create({
-                recipient_id: newAgentId,
-                type: 'ticket_assigned',
-                title: `Ticket Asignado #${actualizado.ticket_id}`,
-                message: `Se te ha asignado el ticket: "${actualizado.titulo}"`,
-                link: `/portal/tickets/${actualizado._id}`
-            });
+    if (newAgentId && newAgentId !== oldAgentId) {
+        // Notificación Email Agente (DESHABILITADO)
+        /*
+        if (actualizado.agente_id && actualizado.agente_id.email) {
+            sendEmail({
+                to: actualizado.agente_id.email,
+                subject: `Nuevo Ticket Asignado: #${actualizado.ticket_id}`,
+                text: `Se te ha asignado el ticket "${actualizado.titulo}". Por favor revísalo en el panel.`
+            }).catch(err => console.error('Error enviando email notificación agente:', err.message));
         }
+        */
 
-        res.json(actualizado);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        // Notificación Interna al Nuevo Agente
+        await Notification.create({
+            recipient_id: newAgentId,
+            type: 'ticket_assigned',
+            title: `Ticket Asignado #${actualizado.ticket_id}`,
+            message: `Se te ha asignado el ticket: "${actualizado.titulo}"`,
+            link: `/portal/tickets/${actualizado._id}`
+        });
     }
+
+    res.json(actualizado);
+} catch (error) {
+    res.status(500).json({ message: error.message });
+}
 };
 
 // @desc    Obtener estado de ticket (Público)
