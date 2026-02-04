@@ -177,7 +177,7 @@ exports.updateTicket = async (req, res) => {
                     to: distEmail,
                     subject: `Actualización de Ticket #${actualizado.ticket_id}`,
                     text: `El estado de tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}.`
-                });
+                }).catch(err => console.error('Error enviando email notificación usuario:', err.message));
             }
 
             // Notifiación Interna al Usuario (si no fue él quien lo cambió)
@@ -203,7 +203,7 @@ exports.updateTicket = async (req, res) => {
                     to: actualizado.agente_id.email,
                     subject: `Nuevo Ticket Asignado: #${actualizado.ticket_id}`,
                     text: `Se te ha asignado el ticket "${actualizado.titulo}". Por favor revísalo en el panel.`
-                });
+                }).catch(err => console.error('Error enviando email notificación agente:', err.message));
             }
 
             // Notificación Interna al Nuevo Agente
