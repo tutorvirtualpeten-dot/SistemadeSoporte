@@ -9,7 +9,7 @@ const commentSchema = new mongoose.Schema({
     usuario_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false // Opcional para comentarios públicos
     },
     mensaje: {
         type: String,

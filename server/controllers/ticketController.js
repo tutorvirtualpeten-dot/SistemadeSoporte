@@ -244,9 +244,12 @@ exports.getTicketStatus = async (req, res) => {
             return res.status(403).json({ message: 'Este caso ya ha sido cerrado definitivamente.' });
         }
 
-        // Obtener comentarios también
+        // Obtener comentarios también (Solo los NO internos)
         const Comment = require('../models/Comment');
-        const comments = await Comment.find({ ticket_id: ticket._id }).sort({ fecha: 1 }).populate('usuario_id', 'nombre');
+        const comments = await Comment.find({
+            ticket_id: ticket._id,
+            es_interno: { $ne: true } // Filtrar internos
+        }).sort({ fecha: 1 }).populate('usuario_id', 'nombre');
 
         res.json({ ...ticket.toObject(), comments });
     } catch (error) {
@@ -272,9 +275,9 @@ exports.addPublicComment = async (req, res) => {
         const Comment = require('../models/Comment');
         const comment = await Comment.create({
             ticket_id: ticket._id,
-            texto,
-            es_publico: true,
-            // Sin usuario_id porque es público (podríamos poner un placeholder o dejarlo null)
+            mensaje: texto, // Usar 'mensaje' como en el modelo
+            es_interno: false,
+            // Sin usuario_id porque es público
         });
 
         // Notificar al Agente o Admin

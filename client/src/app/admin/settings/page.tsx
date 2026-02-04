@@ -41,6 +41,22 @@ export default function SettingsPage() {
                     onChange={(e) => setSettings({ ...settings, logo_url: e.target.value })}
                 />
 
+                {settings.logo_url && (
+                    <div className="mt-2">
+                        <p className="text-xs text-gray-500 mb-1">Vista Previa:</p>
+                        <div className="p-2 border rounded bg-gray-50 inline-block">
+                            <img
+                                src={settings.logo_url}
+                                alt="Logo Preview"
+                                className="h-16 w-auto object-contain"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="border-t pt-4">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-medium text-gray-900">Configuración SMTP (Correo)</h3>
