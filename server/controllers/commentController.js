@@ -18,7 +18,7 @@ exports.addComment = async (req, res) => {
         // Uso de ?.toString() para evitar crash si es null
         const isOwner = ticket.usuario_id?.toString() === userId;
         const isAgent = ticket.agente_id?.toString() === userId;
-        const isAdmin = req.user.rol === 'admin';
+        const isAdmin = req.user.rol === 'admin' || req.user.rol === 'super_admin';
 
         if (!isOwner && !isAgent && !isAdmin) {
             return res.status(401).json({ message: 'No autorizado para comentar en este ticket' });
