@@ -50,47 +50,46 @@ export default function LoginPage() {
 
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                    <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                        <div className="flex justify-center mb-4">
-                            <img
-                                src={settings.logo_url || '/logo.png'}
-                                alt="Logo"
-                                className="h-24 w-auto object-contain"
-                                onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.onerror = null;
-                                    target.src = '/logo.png';
-                                }}
-                            />
-                        </div>
-                        <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
-                            {settings.nombre_app || 'Soporte Petén'}
-                        </h2>
-                        <p className="mt-2 text-center text-sm text-gray-600">
-                            Acceso para Personal de Soporte
-                        </p>
+                    <div className="flex justify-center mb-4">
+                        <img
+                            src={settings.logo_url || '/logo.png'}
+                            alt="Logo"
+                            className="h-24 w-auto object-contain"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/logo.png';
+                            }}
+                        />
                     </div>
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        <div className="space-y-4">
-                            <Input
-                                label="Correo Electrónico"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="usuario@soporte.com"
-                            />
-                            <Input
-                                label="Contraseña"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                            />
-                        </div>
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
+                        {settings.nombre_app || 'Soporte Petén'}
+                    </h2>
+                    <p className="mt-2 text-center text-sm text-gray-600">
+                        Acceso para Personal de Soporte
+                    </p>
+                </div>
+                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    <div className="space-y-4">
+                        <Input
+                            label="Correo Electrónico"
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="usuario@soporte.com"
+                        />
+                        <Input
+                            label="Contraseña"
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                        />
+                    </div>
 
-                        {/* <div className="flex flex-col items-center justify-end space-y-2">
+                    {/* <div className="flex flex-col items-center justify-end space-y-2">
                         <div className="text-sm">
                             <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
                                 ¿Olvidaste tu contraseña?
@@ -98,17 +97,17 @@ export default function LoginPage() {
                         </div>
                     </div> */}
 
-                        {error && (
-                            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
-                                {error}
-                            </div>
-                        )}
+                    {error && (
+                        <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+                            {error}
+                        </div>
+                    )}
 
-                        <Button type="submit" className="w-full h-12 text-lg" isLoading={loading}>
-                            Iniciar Sesión
-                        </Button>
-                    </form>
-                </div>
+                    <Button type="submit" className="w-full h-12 text-lg" isLoading={loading}>
+                        Iniciar Sesión
+                    </Button>
+                </form>
             </div>
-            );
+        </div>
+    );
 }
