@@ -30,20 +30,15 @@ export default function AdminSidebar() {
         <>
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center justify-between bg-blue-900 text-white p-4">
-                {settings.logo_url || true ? ( // Always show usage, force fallback check logic
+                <div className="flex items-center space-x-2">
                     <img
                         src={settings.logo_url || '/logo.png'}
                         alt="Logo"
                         className="h-8 w-auto mix-blend-lighten"
-                        onError={(e) => {
-                            // If fallback fails, hide image and show text maybe? Or just keep it hidden
-                            // For now let's hope /logo.png exists as generated
-                            if (!settings.logo_url) (e.target as HTMLImageElement).style.display = 'none';
-                        }}
+                        onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                     />
-                ) : (
-                    <span className="font-bold">{settings.nombre_app || 'Admin Panel'}</span>
-                )}
+                    {!settings.logo_url && <span className="font-bold ml-2">{settings.nombre_app || 'Admin Panel'}</span>}
+                </div>
                 <button onClick={toggleSidebar}>
                     {isOpen ? <X /> : <Menu />}
                 </button>
@@ -55,18 +50,14 @@ export default function AdminSidebar() {
             `}>
                 <div className="flex flex-col h-full">
                     <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
-                        {settings.logo_url || true ? (
+                        <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
                             <img
                                 src={settings.logo_url || '/logo.png'}
-                                alt="Logo"
+                                alt="Admin Logo"
                                 className="h-10 max-w-full object-contain"
-                                onError={(e) => {
-                                    if (!settings.logo_url) (e.target as HTMLImageElement).style.display = 'none';
-                                }}
+                                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                             />
-                        ) : (
-                            <h1 className="text-xl font-bold tracking-wider truncate">{settings.nombre_app || 'Admin Panel'}</h1>
-                        )}
+                        </div>
                     </div>
 
                     <nav className="flex-1 px-4 py-6 space-y-2">

@@ -9,9 +9,10 @@ import { ArrowLeft, Search, CheckCircle, Clock, AlertCircle, MessageSquare, Star
 
 interface Comment {
     _id: string;
-    texto: string;
-    usuario_id?: { nombre: string };
+    mensaje: string; // Updated field name
+    usuario_id?: { nombre: string }; // Optional
     fecha: string;
+    es_interno: boolean;
 }
 
 interface TicketStatus {
@@ -53,8 +54,10 @@ export default function ConsultarPage() {
 
         try {
             const { data } = await api.get(`/tickets/status/${ticketId.trim()}`);
+            console.log('Ticket loaded:', data);
             setTicket(data);
         } catch (err: any) {
+            console.error(err);
             setError(err.response?.data?.message || 'No se encontró un ticket con ese número.');
         } finally {
             setLoading(false);
@@ -73,6 +76,7 @@ export default function ConsultarPage() {
             setTicket(data);
             setNewComment('');
         } catch (error) {
+            console.error(error);
             alert('Error enviando mensaje');
         } finally {
             setSendingComment(false);
@@ -87,9 +91,9 @@ export default function ConsultarPage() {
         try {
             await api.put(`/tickets/public/rate/${ticket.ticket_id}`, { rating, feedback });
             alert('¡Gracias por tu calificación!');
-            // Refresh logic will basically show "Closed" state or we can just reset
             setTicket({ ...ticket, estado: 'cerrado', calificacion: rating, mensaje_resolucion: feedback });
         } catch (error) {
+            console.error(error);
             alert('Error guardando calificación');
         } finally {
             setSubmittingRating(false);
@@ -183,30 +187,62 @@ export default function ConsultarPage() {
                             </div>
 
                             {/* Chat / Comentarios */}
-                            <div className="bg-gray-50 rounded-lg p-4 mb-6 max-h-60 overflow-y-auto">
+                            <div className="bg-gray-50 rounded-lg p-4 mb-6">
                                 <h3 className="text-xs font-bold text-gray-500 uppercase mb-3 flex items-center">
                                     <MessageSquare className="h-3 w-3 mr-1" /> Historial de Mensajes
                                 </h3>
-                                {ticket.comments && ticket.comments.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {ticket.comments.map((c) => (
-                                            <li key={c._id} className="bg-white p-3 rounded shadow-sm text-sm">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <span className="font-bold text-gray-800">{c.usuario_id?.nombre || 'Tú (Usuario)'}</span>
-                                                    <span className="text-xs text-gray-400">{new Date(c.fecha).toLocaleDateString()}</span>
+
+                                <div className="space-y-4 max-h-80 overflow-y-auto mb-4 custom-scrollbar pr-2">
+                                    {ticket.comments && ticket.comments.length > 0 ? (
+                                        ticket.comments.map((c) => {
+                                            const isAgent = !!c.usuario_id;
+                                            return (
+                                                <div key={c._id} className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}>
+                                                    <div className={`max-w-[85%] rounded-lg p-3 ${isAgent ? 'bg-white border border-gray-200' : 'bg-blue-100 text-blue-900'}`}>
+                                                        <div className="flex justify-between items-center mb-1 gap-2">
+                                                            <span className={`text-xs font-bold ${isAgent ? 'text-gray-700' : 'text-blue-800'}`}>
+                                                                {c.usuario_id?.nombre || 'Tú'}
+                                                            </span>
+                                                            <span className="text-[10px] text-gray-400">
+                                                                {new Date(c.fecha).toLocaleDateString()} {new Date(c.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm">{c.mensaje || (c as any).texto}</p>
+                                                    </div>
                                                 </div>
-                                                <p className="text-gray-700">{c.texto}</p>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p className="text-xs text-gray-400 text-center italic">No hay mensajes aún.</p>
+                                            );
+                                        })
+                                    ) : (
+                                        <p className="text-xs text-gray-400 text-center italic py-4">
+                                            No hay mensajes en el historial.
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Input Area */}
+                                {ticket.estado !== 'cerrado' && (
+                                    <div className="flex gap-2 mt-2">
+                                        <Input
+                                            placeholder="Escribe un mensaje al técnico..."
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            className="text-black bg-white"
+                                        />
+                                        <Button
+                                            onClick={handleAddComment}
+                                            isLoading={sendingComment}
+                                            disabled={!newComment.trim()}
+                                            className="px-4"
+                                        >
+                                            <Send className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Acciones según estado */}
-                            {ticket.estado === 'resuelto' ? (
-                                <div className="bg-green-50 border border-green-100 rounded-lg p-5 text-center">
+                            {/* Rating (Solo si resuelto) */}
+                            {ticket.estado === 'resuelto' && (
+                                <div className="bg-green-50 border border-green-100 rounded-lg p-5 text-center animation-fade-in">
                                     <h3 className="text-lg font-bold text-green-900 mb-2">¿Tu problema fue solucionado?</h3>
                                     <p className="text-sm text-green-700 mb-4">
                                         Por favor califica la atención para cerrar el ticket definitivamente.
@@ -217,7 +253,7 @@ export default function ConsultarPage() {
                                             <button
                                                 key={star}
                                                 onClick={() => setRating(star)}
-                                                className={`transition-colors duration-150 ${rating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                                                className={`transition-colors duration-150 transform hover:scale-110 ${rating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
                                             >
                                                 <Star className="h-8 w-8 fill-current" />
                                             </button>
@@ -225,7 +261,7 @@ export default function ConsultarPage() {
                                     </div>
 
                                     {rating > 0 && (
-                                        <div className="animation-fade-in space-y-3">
+                                        <div className="space-y-3">
                                             <Input
                                                 placeholder="Comentario opcional sobre el servicio..."
                                                 value={feedback}
@@ -238,22 +274,13 @@ export default function ConsultarPage() {
                                         </div>
                                     )}
                                 </div>
-                            ) : ticket.estado !== 'cerrado' ? (
-                                <form onSubmit={handleAddComment} className="flex gap-2">
-                                    <Input
-                                        placeholder="Escribe un mensaje..."
-                                        value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
-                                        className="text-black"
-                                    />
-                                    <Button type="submit" isLoading={sendingComment} disabled={!newComment.trim()}>
-                                        <Send className="h-4 w-4" />
-                                    </Button>
-                                </form>
-                            ) : null}
+                            )}
 
-                            <div className="mt-6 pt-4 border-t text-center">
-                                <button onClick={() => setTicket(null)} className="text-sm text-blue-600 hover:underline">
+                            <div className="mt-8 pt-4 border-t text-center">
+                                <button
+                                    onClick={() => { setTicket(null); setTicketId(''); }}
+                                    className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline"
+                                >
                                     Consultar otro ticket
                                 </button>
                             </div>

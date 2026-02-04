@@ -22,12 +22,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                                     src={settings.logo_url || '/logo.png'}
                                     alt="Logo"
                                     className="h-8 w-auto mr-2"
-                                    onError={(e) => {
-                                        if (!settings.logo_url) {
-                                            (e.target as HTMLImageElement).src = '/logo.png';
-                                            (e.target as HTMLImageElement).onerror = null; // prevent infinite loop
-                                        }
-                                    }}
+                                    onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                                 />
                                 <span className={settings.logo_url ? "hidden sm:inline" : ""}>
                                     {settings.nombre_app || 'Soporte Petén'}
