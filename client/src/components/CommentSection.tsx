@@ -48,7 +48,9 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
             fetchComments();
         } catch (error) {
             console.error(error);
-            alert('Error enviando comentario');
+            // @ts-ignore
+            const msg = error.response?.data?.message || 'Error enviando comentario';
+            alert(msg);
         } finally {
             setLoading(false);
         }
@@ -75,7 +77,7 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
                                     </div>
                                     <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                         <div>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-gray-900">
                                                 <span className="font-medium text-gray-900">{comment.usuario_id.nombre}</span>
                                                 {comment.es_interno && <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-1 rounded">Nota Interna</span>}
                                             </p>
@@ -85,7 +87,7 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="ml-11 mt-1 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                                <div className="ml-11 mt-1 text-sm text-gray-900 bg-gray-100 p-3 rounded-lg border border-gray-200">
                                     <p>{comment.mensaje}</p>
                                 </div>
                             </div>
@@ -101,7 +103,7 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
                         rows={3}
                         name="comment"
                         id="comment"
-                        className="block w-full py-3 px-4 resize-none border-0 focus:ring-0 sm:text-sm"
+                        className="block w-full py-3 px-4 resize-none border-0 focus:ring-0 sm:text-sm text-gray-900 placeholder-gray-500"
                         placeholder="Escribe un mensaje..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
