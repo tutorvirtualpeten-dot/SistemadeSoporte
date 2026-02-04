@@ -1,20 +1,26 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { GraduationCap, Briefcase, KeyRound, Search, HelpCircle } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function Home() {
+  const { settings } = useSettings();
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl text-center">
         <div className="flex justify-center mb-6">
           <img
-            src="/logo.png"
+            src={settings.logo_url || '/logo.png'}
             alt="Soporte Petén"
             className="h-32 w-auto object-contain"
+            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
           />
         </div>
         <h1 className="text-center text-5xl font-extrabold text-blue-900 tracking-tight mb-4">
-          Soporte Petén
+          {settings.nombre_app || 'Soporte Petén'}
         </h1>
         <p className="text-center text-xl text-gray-600 mb-12">
           Selecciona tu perfil para iniciar una solicitud
