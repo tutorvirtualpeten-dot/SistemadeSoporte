@@ -72,13 +72,15 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
                                     <div className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${comment.es_interno ? 'bg-yellow-500' : 'bg-blue-500'
                                         }`}>
                                         <span className="text-white text-xs font-bold">
-                                            {comment.usuario_id.nombre.charAt(0).toUpperCase()}
+                                            {(comment.usuario_id?.nombre || 'U').charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                         <div>
                                             <p className="text-sm text-gray-900">
-                                                <span className="font-medium text-gray-900">{comment.usuario_id.nombre}</span>
+                                                <span className="font-medium text-gray-900">
+                                                    {comment.usuario_id?.nombre || 'Usuario (Público)'}
+                                                </span>
                                                 {comment.es_interno && <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-1 rounded">Nota Interna</span>}
                                             </p>
                                         </div>
