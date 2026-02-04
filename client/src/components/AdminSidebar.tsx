@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { Button } from './ui/Button';
+import LogoImage from './LogoImage';
 
 export default function AdminSidebar() {
     const pathname = usePathname();
@@ -31,11 +32,9 @@ export default function AdminSidebar() {
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center justify-between bg-blue-900 text-white p-4">
                 <div className="flex items-center space-x-2">
-                    <img
-                        src={settings.logo_url || '/logo.png'}
-                        alt="Logo"
+                    <LogoImage
+                        src={settings.logo_url}
                         className="h-8 w-auto mix-blend-lighten"
-                        onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                     />
                     {!settings.logo_url && <span className="font-bold ml-2">{settings.nombre_app || 'Admin Panel'}</span>}
                 </div>
@@ -51,11 +50,10 @@ export default function AdminSidebar() {
                 <div className="flex flex-col h-full">
                     <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
                         <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
-                            <img
-                                src={settings.logo_url || '/logo.png'}
+                            <LogoImage
+                                src={settings.logo_url}
                                 alt="Admin Logo"
                                 className="h-10 max-w-full object-contain"
-                                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                             />
                         </div>
                     </div>

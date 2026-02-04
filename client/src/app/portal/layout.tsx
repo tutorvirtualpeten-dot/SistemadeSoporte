@@ -5,6 +5,7 @@ import { useSettings } from '@/context/SettingsContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
+import LogoImage from '@/components/LogoImage';
 import NotificationBell from '@/components/NotificationBell';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
@@ -18,11 +19,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                     <div className="flex justify-between h-16">
                         <div className="flex">
                             <Link href="/portal" className="flex-shrink-0 flex items-center font-bold text-xl text-blue-600">
-                                <img
-                                    src={settings.logo_url || '/logo.png'}
-                                    alt="Logo"
+                                <LogoImage
+                                    src={settings.logo_url}
                                     className="h-8 w-auto mr-2"
-                                    onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                                 />
                                 <span className={settings.logo_url ? "hidden sm:inline" : ""}>
                                     {settings.nombre_app || 'Soporte Petén'}

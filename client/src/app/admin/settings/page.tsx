@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import LogoImage from '@/components/LogoImage';
 
 export default function SettingsPage() {
     const [settings, setSettings] = useState<any>({});
@@ -17,8 +18,9 @@ export default function SettingsPage() {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.put('/settings', settings);
-            alert('Configuración guardada');
+            await api.post('/settings', settings);
+            // Reload to apply changes (logo context)
+            window.location.reload();
         } catch (error) {
             alert('Error guardando configuración');
         } finally {
@@ -27,14 +29,16 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="max-w-2xl bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-6">Configuración del Sistema</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Configuración General</h1>
+
+            <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
                 <Input
                     label="Nombre de la Aplicación"
                     value={settings.nombre_app || ''}
                     onChange={(e) => setSettings({ ...settings, nombre_app: e.target.value })}
                 />
+
                 <Input
                     label="URL del Logo"
                     value={settings.logo_url || ''}
@@ -45,13 +49,9 @@ export default function SettingsPage() {
                     <div className="mt-2">
                         <p className="text-xs text-gray-500 mb-1">Vista Previa:</p>
                         <div className="p-2 border rounded bg-gray-50 inline-block">
-                            <img
+                            <LogoImage
                                 src={settings.logo_url}
-                                alt="Logo Preview"
                                 className="h-16 w-auto object-contain"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                }}
                             />
                         </div>
                     </div>

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import api from '@/lib/api';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import LogoImage from '@/components/LogoImage';
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -51,11 +52,9 @@ export default function LoginPage() {
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="flex justify-center mb-4">
-                        <img
-                            src={settings.logo_url || '/logo.png'}
-                            alt="Logo"
+                        <LogoImage
+                            src={settings.logo_url}
                             className="h-24 w-auto object-contain"
-                            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
                         />
                     </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
