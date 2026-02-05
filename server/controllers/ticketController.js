@@ -30,14 +30,18 @@ exports.createTicket = async (req, res) => {
         if (!req.user) {
             // Usuario público - necesitamos validar contacto
             console.log('⚠️ Public user detected - validating contact data');
+
+            // Ahora que enviamos JSON, datos_contacto es un objeto anidado
+            const contactoData = req.body.datos_contacto || {};
+
             datos_contacto = {
-                nombre_completo: req.body['datos_contacto[nombre_completo]'],
-                email: req.body['datos_contacto[email]'],
-                telefono: req.body['datos_contacto[telefono]'],
-                dpi: req.body['datos_contacto[dpi]']
+                nombre_completo: contactoData.nombre_completo,
+                email: contactoData.email,
+                telefono: contactoData.telefono,
+                dpi: contactoData.dpi
             };
 
-            if (!datos_contacto?.nombre_completo || !datos_contacto?.email) {
+            if (!datos_contacto.nombre_completo || !datos_contacto.email) {
                 console.log('❌ Validation failed: Missing contact data for public user');
                 return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
             }
