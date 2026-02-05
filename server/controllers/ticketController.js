@@ -8,15 +8,25 @@ const Notification = require('../models/Notification');
 // @access  Private (Docente/Administrativo)
 exports.createTicket = async (req, res) => {
     try {
+        console.log('📥 Received ticket creation request');
+        console.log('Body:', req.body);
+        console.log('Files:', req.files);
+
         const {
             titulo,
             descripcion,
             prioridad,
             categoria_id,
-            datos_contacto,
-            archivo_adjunto,
-            tipo_usuario // Ahora viene del body si es público
+            tipo_usuario
         } = req.body;
+
+        // Parsear datos_contacto desde FormData (vienen como campos planos)
+        const datos_contacto = {
+            nombre_completo: req.body['datos_contacto[nombre_completo]'] || req.body.nombre_completo,
+            email: req.body['datos_contacto[email]'] || req.body.email,
+            telefono: req.body['datos_contacto[telefono]'] || req.body.telefono_whatsapp,
+            dpi: req.body['datos_contacto[dpi]'] || req.body.dpi
+        };
 
         // Si hay usuario logueado, usamos sus datos. Si no, usamos lo del body
         const usuario_id = req.user ? req.user.id : null;
@@ -24,12 +34,14 @@ exports.createTicket = async (req, res) => {
 
         // Validar datos de contacto si es público
         if (!req.user && (!datos_contacto?.nombre_completo || !datos_contacto?.email)) {
+            console.log('❌ Validation failed: Missing contact data');
             return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
         }
 
         // Procesar archivos subidos (Cloudinary)
         let archivosGuardados = [];
         if (req.files && req.files.length > 0) {
+            console.log(`📎 Processing ${req.files.length} files`);
             archivosGuardados = req.files.map(file => ({
                 url: file.path,
                 public_id: file.filename,
@@ -37,6 +49,7 @@ exports.createTicket = async (req, res) => {
             }));
         }
 
+        console.log('💾 Creating ticket in database...');
         const nuevoTicket = await Ticket.create({
             titulo,
             descripcion,
