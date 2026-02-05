@@ -13,7 +13,7 @@ export default function LogoImage({
     src,
     alt = "Logo",
     className,
-    fallbackSrc = "/logo.png"
+    fallbackSrc = "/logo_mineduc.jpg"
 }: LogoImageProps) {
     const [hasError, setHasError] = useState(false);
 
