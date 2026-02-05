@@ -34,7 +34,7 @@ export default function AdminSidebar() {
                 <div className="flex items-center space-x-2">
                     <LogoImage
                         src={settings.logo_url}
-                        className="h-8 w-auto mix-blend-lighten"
+                        className="h-8 w-auto"
                     />
                     {!settings.logo_url && <span className="font-bold ml-2">{settings.nombre_app || 'Admin Panel'}</span>}
                 </div>
@@ -49,13 +49,11 @@ export default function AdminSidebar() {
             `}>
                 <div className="flex flex-col h-full">
                     <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
-                        <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
-                            <LogoImage
-                                src={settings.logo_url}
-                                alt="Admin Logo"
-                                className="h-10 max-w-full object-contain"
-                            />
-                        </div>
+                        <LogoImage
+                            src={settings.logo_url}
+                            alt="Admin Logo"
+                            className="h-10 max-w-full object-contain"
+                        />
                     </div>
 
                     <nav className="flex-1 px-4 py-6 space-y-2">
