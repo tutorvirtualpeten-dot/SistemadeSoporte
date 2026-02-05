@@ -48,7 +48,6 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
         descripcion: '',
         prioridad: 'media',
         categoria_id: '',
-        categoria_id: '',
         rol: initialRole // Para modo público
     });
 
