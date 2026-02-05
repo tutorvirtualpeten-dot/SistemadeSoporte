@@ -84,11 +84,13 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
             formDataToSend.append('tipo_usuario', user ? user.rol : formData.rol);
             formDataToSend.append('categoria_id', formData.categoria_id);
 
-            // Datos contacto
-            formDataToSend.append('datos_contacto[nombre_completo]', formData.nombre_completo);
-            formDataToSend.append('datos_contacto[email]', formData.email);
-            formDataToSend.append('datos_contacto[telefono]', formData.telefono_whatsapp);
-            formDataToSend.append('datos_contacto[dpi]', formData.dpi);
+            // Datos contacto (solo si NO está logueado)
+            if (!user) {
+                formDataToSend.append('datos_contacto[nombre_completo]', formData.nombre_completo);
+                formDataToSend.append('datos_contacto[email]', formData.email);
+                formDataToSend.append('datos_contacto[telefono]', formData.telefono_whatsapp);
+                formDataToSend.append('datos_contacto[dpi]', formData.dpi);
+            }
 
             // Archivos
             if (selectedFiles) {

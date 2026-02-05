@@ -20,23 +20,26 @@ exports.createTicket = async (req, res) => {
             tipo_usuario
         } = req.body;
 
-        // Parsear datos_contacto desde FormData (vienen como campos planos)
-        const datos_contacto = {
-            nombre_completo: req.body['datos_contacto[nombre_completo]'] || req.body.nombre_completo,
-            email: req.body['datos_contacto[email]'] || req.body.email,
-            telefono: req.body['datos_contacto[telefono]'] || req.body.telefono_whatsapp,
-            dpi: req.body['datos_contacto[dpi]'] || req.body.dpi
-        };
+        // Parsear datos_contacto desde FormData (solo si NO hay usuario autenticado)
+        let datos_contacto = null;
+        if (!req.user) {
+            datos_contacto = {
+                nombre_completo: req.body['datos_contacto[nombre_completo]'],
+                email: req.body['datos_contacto[email]'],
+                telefono: req.body['datos_contacto[telefono]'],
+                dpi: req.body['datos_contacto[dpi]']
+            };
+
+            // Validar datos de contacto si es público
+            if (!datos_contacto?.nombre_completo || !datos_contacto?.email) {
+                console.log('❌ Validation failed: Missing contact data');
+                return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
+            }
+        }
 
         // Si hay usuario logueado, usamos sus datos. Si no, usamos lo del body
         const usuario_id = req.user ? req.user.id : null;
         const rolUsuario = req.user ? req.user.rol : (tipo_usuario || 'docente');
-
-        // Validar datos de contacto si es público
-        if (!req.user && (!datos_contacto?.nombre_completo || !datos_contacto?.email)) {
-            console.log('❌ Validation failed: Missing contact data');
-            return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
-        }
 
         // Procesar archivos subidos (Cloudinary)
         let archivosGuardados = [];
