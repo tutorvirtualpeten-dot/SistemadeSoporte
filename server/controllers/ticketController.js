@@ -9,7 +9,7 @@ const Notification = require('../models/Notification');
 exports.createTicket = async (req, res) => {
     try {
         console.log('Body:', req.body);
-        console.log('Files:', req.files);
+
         console.log('🔐 User authenticated:', !!req.user);
         console.log('👤 User info:', req.user ? { id: req.user.id, rol: req.user.rol, email: req.user.email } : 'None');
 
@@ -47,16 +47,6 @@ exports.createTicket = async (req, res) => {
             console.log('✅ Authenticated user - SKIPPING contact data validation entirely');
         }
 
-        // Procesar archivos subidos (Cloudinary)
-        let archivosGuardados = [];
-        if (req.files && req.files.length > 0) {
-            console.log(`📎 Processing ${req.files.length} files`);
-            archivosGuardados = req.files.map(file => ({
-                url: file.path,
-                public_id: file.filename,
-                nombre_original: file.originalname
-            }));
-        }
 
         console.log('💾 Creating ticket in database...');
         const nuevoTicket = await Ticket.create({
@@ -66,8 +56,7 @@ exports.createTicket = async (req, res) => {
             usuario_id,
             tipo_usuario: rolUsuario,
             datos_contacto,
-            categoria_id,
-            archivos: archivosGuardados // Guardar array de archivos
+            categoria_id
         });
 
         // NOTIFICACIÓN POR CORREO (Usuario) - DESHABILITADO POR SOLICITUD

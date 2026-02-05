@@ -51,8 +51,7 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
         rol: initialRole // Para modo público
     });
 
-    // Estado separado para archivos
-    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+
 
     useEffect(() => {
         if (user) {
@@ -77,31 +76,16 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
         setLoading(true);
 
         try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('titulo', formData.titulo);
-            formDataToSend.append('descripcion', formData.descripcion);
-            formDataToSend.append('prioridad', formData.prioridad);
-            formDataToSend.append('tipo_usuario', user ? user.rol : formData.rol);
-            formDataToSend.append('categoria_id', formData.categoria_id);
-
-            // Datos contacto (solo si NO está logueado)
-            if (!user) {
-                formDataToSend.append('datos_contacto[nombre_completo]', formData.nombre_completo);
-                formDataToSend.append('datos_contacto[email]', formData.email);
-                formDataToSend.append('datos_contacto[telefono]', formData.telefono_whatsapp);
-                formDataToSend.append('datos_contacto[dpi]', formData.dpi);
-            }
-
-            // Archivos
-            if (selectedFiles) {
-                for (let i = 0; i < selectedFiles.length; i++) {
-                    formDataToSend.append('archivos', selectedFiles[i]);
-                }
-            }
-
-            // NO especificar Content-Type manualmente - axios lo detecta automáticamente
-            // y así NO sobrescribe el header Authorization del interceptor
-            const { data } = await api.post('/tickets', formDataToSend);
+            const { data } = await api.post('/tickets', {
+                ...formData,
+                tipo_usuario: user ? user.rol : formData.rol,
+                datos_contacto: !user ? {
+                    nombre_completo: formData.nombre_completo,
+                    email: formData.email,
+                    telefono: formData.telefono_whatsapp,
+                    dpi: formData.dpi
+                } : undefined
+            });
 
             if (publicMode && !user) {
                 setTicketId(data.ticket_id.toString()); // Usar el ID numérico
@@ -256,24 +240,7 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
                     />
                 </div>
 
-                {(formData.rol === 'administrativo' || (user?.rol as string) === 'administrativo') && (
-                    <div className="sm:col-span-2">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-bold text-gray-900">Adjuntar Archivos (PDF, Imágenes)</label>
-                            <input
-                                type="file"
-                                name="archivos"
-                                multiple
-                                accept="image/*,application/pdf"
-                                onChange={(e) => setSelectedFiles(e.target.files)}
-                                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
-                            />
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Solo disponible para personal administrativo.
-                        </p>
-                    </div>
-                )}
+
             </div>
 
             <div className="flex justify-end pt-5">

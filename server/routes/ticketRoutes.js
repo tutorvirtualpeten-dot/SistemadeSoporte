@@ -17,11 +17,9 @@ router.get('/status/:id', getTicketStatus); // Ruta pública de consulta
 router.post('/public/comment/:id', addPublicComment); // Ruta pública de comentario
 router.put('/public/rate/:id', rateTicket); // Ruta pública de calificación
 
-const upload = require('../middleware/uploadMiddleware');
-
 router.route('/')
     .get(protect, getTickets)
-    .post(optionalAuth, upload.array('archivos', 5), createTicket);
+    .post(optionalAuth, createTicket);
 
 router.route('/:id')
     .get(protect, getTicketById)
