@@ -99,9 +99,9 @@ export default function TicketForm({ publicMode = false, initialRole = 'docente'
                 }
             }
 
-            const { data } = await api.post('/tickets', formDataToSend, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            // NO especificar Content-Type manualmente - axios lo detecta automáticamente
+            // y así NO sobrescribe el header Authorization del interceptor
+            const { data } = await api.post('/tickets', formDataToSend);
 
             if (publicMode && !user) {
                 setTicketId(data.ticket_id.toString()); // Usar el ID numérico
