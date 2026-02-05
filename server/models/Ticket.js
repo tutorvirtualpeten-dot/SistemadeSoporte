@@ -43,9 +43,11 @@ const ticketSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     },
-    archivo_adjunto: {
-        type: String // URL del archivo
-    },
+    archivos: [{
+        url: String,
+        public_id: String,
+        nombre_original: String
+    }],
     ticket_id: {
         type: Number,
         unique: true,

@@ -19,7 +19,8 @@ interface Ticket {
     ticket_id?: number;
     usuario_id?: { _id: string; nombre: string; email: string };
     datos_contacto?: { nombre_completo: string; telefono: string; dpi: string; email: string };
-    archivo_adjunto?: string;
+    archivo_adjunto?: string; // Legacy
+    archivos?: { url: string; nombre_original: string; public_id: string }[];
     agente_id?: { _id: string; nombre: string; email: string };
     calificacion?: number;
     mensaje_resolucion?: string;
@@ -310,13 +311,42 @@ export default function TicketDetailPage() {
                             </dd>
                         </div>
 
-                        {ticket.archivo_adjunto && (
+                        {/* Archivos Adjuntos (Múltiples + Legacy) */}
+                        {(ticket.archivos && ticket.archivos.length > 0 || ticket.archivo_adjunto) && (
                             <div className="sm:col-span-2">
-                                <dt className="text-sm font-medium text-gray-500">Archivo Adjunto</dt>
-                                <dd className="mt-1 text-sm text-blue-600">
-                                    <a href={ticket.archivo_adjunto} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                                        Ver Archivo
-                                    </a>
+                                <dt className="text-sm font-medium text-gray-500">Archivos Adjuntos</dt>
+                                <dd className="mt-1 text-sm text-gray-900">
+                                    <ul className="border border-gray-200 rounded-md divide-y divide-gray-200">
+                                        {/* Legacy Single File */}
+                                        {ticket.archivo_adjunto && !ticket.archivos?.length && (
+                                            <li className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                <div className="w-0 flex-1 flex items-center">
+                                                    <span className="ml-2 flex-1 w-0 truncate">Adjunto Principal</span>
+                                                </div>
+                                                <div className="ml-4 flex-shrink-0">
+                                                    <a href={ticket.archivo_adjunto} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:text-blue-500">
+                                                        Ver
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        )}
+
+                                        {/* New Array Files */}
+                                        {ticket.archivos?.map((file, index) => (
+                                            <li key={index} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                                <div className="w-0 flex-1 flex items-center">
+                                                    <span className="ml-2 flex-1 w-0 truncate">
+                                                        {file.nombre_original || `Archivo ${index + 1}`}
+                                                    </span>
+                                                </div>
+                                                <div className="ml-4 flex-shrink-0">
+                                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:text-blue-500">
+                                                        Descargar
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </dd>
                             </div>
                         )}

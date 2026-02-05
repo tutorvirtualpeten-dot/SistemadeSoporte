@@ -27,6 +27,16 @@ exports.createTicket = async (req, res) => {
             return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
         }
 
+        // Procesar archivos subidos (Cloudinary)
+        let archivosGuardados = [];
+        if (req.files && req.files.length > 0) {
+            archivosGuardados = req.files.map(file => ({
+                url: file.path,
+                public_id: file.filename,
+                nombre_original: file.originalname
+            }));
+        }
+
         const nuevoTicket = await Ticket.create({
             titulo,
             descripcion,
@@ -35,7 +45,7 @@ exports.createTicket = async (req, res) => {
             tipo_usuario: rolUsuario,
             datos_contacto,
             categoria_id,
-            archivo_adjunto
+            archivos: archivosGuardados // Guardar array de archivos
         });
 
         // NOTIFICACIÓN POR CORREO (Usuario) - DESHABILITADO POR SOLICITUD
