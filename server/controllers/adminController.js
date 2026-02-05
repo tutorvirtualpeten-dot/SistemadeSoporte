@@ -92,23 +92,89 @@ exports.updateUser = async (req, res) => {
     }
 };
 
-// @desc    Obtener estadísticas del dashboard
+// @desc    Obtener estadísticas avanzadas del dashboard
 // @route   GET /api/admin/stats
 // @access  Private (Admin)
 exports.getDashboardStats = async (req, res) => {
     try {
-        const totalTickets = await Ticket.countDocuments();
-        const pendientes = await Ticket.countDocuments({ estado: 'abierto' });
-        const enProceso = await Ticket.countDocuments({ estado: 'en_progreso' });
-        const resueltos = await Ticket.countDocuments({ estado: { $in: ['resuelto', 'cerrado'] } });
+        const { startDate, endDate } = req.query;
+        let dateFilter = {};
+
+        if (startDate && endDate) {
+            dateFilter = {
+                createdAt: {
+                    $gte: new Date(startDate),
+                    $lte: new Date(endDate)
+                }
+            };
+        }
+
+        // 1. Resumen General (KPIs)
+        const totalTickets = await Ticket.countDocuments(dateFilter);
+        const pendientes = await Ticket.countDocuments({ ...dateFilter, estado: 'abierto' });
+        const enProceso = await Ticket.countDocuments({ ...dateFilter, estado: 'en_progreso' });
+        const resueltos = await Ticket.countDocuments({ ...dateFilter, estado: { $in: ['resuelto', 'cerrado'] } });
+
+        // 2. Tickets por Estado (Para Pie Chart)
+        const ticketsByStatus = await Ticket.aggregate([
+            { $match: dateFilter },
+            { $group: { _id: '$estado', count: { $sum: 1 } } }
+        ]);
+
+        // 3. Tickets por Prioridad (Para Bar Chart)
+        const ticketsByPriority = await Ticket.aggregate([
+            { $match: dateFilter },
+            { $group: { _id: '$prioridad', count: { $sum: 1 } } }
+        ]);
+
+        // 4. Tickets por Categoría (Para Bar Chart) - Requiere $lookup si category es ObjectId
+        const ticketsByCategory = await Ticket.aggregate([
+            { $match: dateFilter },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'categoria',
+                    foreignField: '_id',
+                    as: 'categoryParams'
+                }
+            },
+            {
+                $group: {
+                    _id: { $arrayElemAt: ['$categoryParams.nombre', 0] }, // Agrupar por nombre de categoría
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+
+        // 5. Tendencia Diaria (Para Line Chart)
+        const dailyTrend = await Ticket.aggregate([
+            { $match: dateFilter },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
 
         res.json({
-            totalTickets,
-            pendientes,
-            enProceso,
-            resueltos
+            summary: {
+                totalTickets,
+                pendientes,
+                enProceso,
+                resueltos
+            },
+            charts: {
+                byStatus: ticketsByStatus,
+                byPriority: ticketsByPriority,
+                byCategory: ticketsByCategory,
+                dailyTrend: dailyTrend
+            }
         });
     } catch (error) {
+        console.error('Error dashboard stats:', error);
         res.status(500).json({ message: error.message });
     }
 };
