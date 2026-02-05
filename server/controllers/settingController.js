@@ -21,14 +21,18 @@ exports.getSettings = async (req, res) => {
 // @access  Private (Admin)
 exports.updateSettings = async (req, res) => {
     try {
-        const settings = await Setting.findOne();
-        if (!settings) {
-            return res.status(404).json({ message: 'Error config no encontrada' });
-        }
+        // Object.assign(settings, req.body);
+        // const updated = await settings.save();
 
-        Object.assign(settings, req.body);
-        await settings.save();
-        res.json(settings);
+        // Use findOneAndUpdate for atomic/safer update
+        const updated = await Setting.findOneAndUpdate(
+            {},
+            { $set: req.body },
+            { new: true, upsert: true }
+        );
+
+        console.log('Settings updated via findOneAndUpdate:', updated);
+        res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
