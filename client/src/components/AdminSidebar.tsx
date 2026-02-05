@@ -12,7 +12,7 @@ import LogoImage from './LogoImage';
 export default function AdminSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
-    const { settings } = useSettings(); // Use settings context
+    const { settings, loading } = useSettings(); // Use settings context
     const [isOpen, setIsOpen] = useState(false);
 
     const toggleSidebar = () => setIsOpen(!isOpen);
@@ -32,11 +32,17 @@ export default function AdminSidebar() {
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center justify-between bg-blue-900 text-white p-4">
                 <div className="flex items-center space-x-2">
-                    <LogoImage
-                        src={settings.logo_url}
-                        className="h-8 w-auto"
-                    />
-                    {!settings.logo_url && <span className="font-bold ml-2">{settings.nombre_app || 'Admin Panel'}</span>}
+                    {loading ? (
+                        <div className="h-8 w-32 bg-blue-800/50 animate-pulse rounded" />
+                    ) : (
+                        <>
+                            <LogoImage
+                                src={settings.logo_url}
+                                className="h-8 w-auto"
+                            />
+                            {!settings.logo_url && <span className="font-bold ml-2">{settings.nombre_app || 'Admin Panel'}</span>}
+                        </>
+                    )}
                 </div>
                 <button onClick={toggleSidebar}>
                     {isOpen ? <X /> : <Menu />}
@@ -49,11 +55,15 @@ export default function AdminSidebar() {
             `}>
                 <div className="flex flex-col h-full">
                     <div className="h-16 flex items-center justify-center bg-slate-800 shadow-md px-4 overflow-hidden">
-                        <LogoImage
-                            src={settings.logo_url}
-                            alt="Admin Logo"
-                            className="h-10 max-w-full object-contain"
-                        />
+                        {loading ? (
+                            <div className="h-10 w-10 bg-slate-700 animate-pulse rounded-full" />
+                        ) : (
+                            <LogoImage
+                                src={settings.logo_url}
+                                alt="Admin Logo"
+                                className="h-10 max-w-full object-contain"
+                            />
+                        )}
                     </div>
 
                     <nav className="flex-1 px-4 py-6 space-y-2">

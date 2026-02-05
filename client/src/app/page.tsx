@@ -7,23 +7,33 @@ import { useSettings } from '@/context/SettingsContext';
 import LogoImage from '@/components/LogoImage';
 
 export default function Home() {
-  const { settings } = useSettings();
+  const { settings, loading } = useSettings();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl text-center">
-        <div className="flex justify-center mb-6">
-          <LogoImage
-            src={settings.logo_url}
-            className="h-32 w-auto object-contain"
-          />
-        </div>
-        <h1 className="text-center text-5xl font-extrabold text-blue-900 tracking-tight mb-4">
-          {settings.nombre_app || 'Soporte Petén'}
-        </h1>
-        <p className="text-center text-xl text-gray-600 mb-12">
-          Selecciona tu perfil para iniciar una solicitud
-        </p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div className="h-32 w-32 bg-gray-200 animate-pulse rounded-lg" />
+            <div className="h-12 w-3/4 bg-gray-200 animate-pulse rounded" />
+            <div className="h-6 w-1/2 bg-gray-200 animate-pulse rounded" />
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-center mb-6">
+              <LogoImage
+                src={settings.logo_url}
+                className="h-32 w-auto object-contain"
+              />
+            </div>
+            <h1 className="text-center text-5xl font-extrabold text-blue-900 tracking-tight mb-4">
+              {settings.nombre_app || 'Soporte Petén'}
+            </h1>
+            <p className="text-center text-xl text-gray-600 mb-12">
+              Selecciona tu perfil para iniciar una solicitud
+            </p>
+          </>
+        )}
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-4xl">

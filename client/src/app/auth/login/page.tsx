@@ -12,7 +12,7 @@ import LogoImage from '@/components/LogoImage';
 
 export default function LoginPage() {
     const { login } = useAuth();
-    const { settings } = useSettings();
+    const { settings, loading: settingsLoading } = useSettings();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -51,18 +51,27 @@ export default function LoginPage() {
 
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                    <div className="flex justify-center mb-4">
-                        <LogoImage
-                            src={settings.logo_url}
-                            className="h-24 w-auto object-contain"
-                        />
-                    </div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
-                        {settings.nombre_app || 'Soporte Petén'}
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
-                        Acceso para Personal de Soporte
-                    </p>
+                    {settingsLoading ? (
+                        <div className="flex flex-col items-center justify-center h-40 space-y-4">
+                            <div className="h-24 w-24 bg-gray-200 animate-pulse rounded-lg" />
+                            <div className="h-8 w-48 bg-gray-200 animate-pulse rounded" />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex justify-center mb-4">
+                                <LogoImage
+                                    src={settings.logo_url}
+                                    className="h-24 w-auto object-contain"
+                                />
+                            </div>
+                            <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-900">
+                                {settings.nombre_app || 'Soporte Petén'}
+                            </h2>
+                            <p className="mt-2 text-center text-sm text-gray-600">
+                                Acceso para Personal de Soporte
+                            </p>
+                        </>
+                    )}
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
