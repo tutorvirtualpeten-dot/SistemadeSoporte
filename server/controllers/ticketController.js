@@ -8,9 +8,10 @@ const Notification = require('../models/Notification');
 // @access  Private (Docente/Administrativo)
 exports.createTicket = async (req, res) => {
     try {
-        console.log('📥 Received ticket creation request');
         console.log('Body:', req.body);
         console.log('Files:', req.files);
+        console.log('🔐 User authenticated:', !!req.user);
+        console.log('👤 User info:', req.user ? { id: req.user.id, rol: req.user.rol, email: req.user.email } : 'None');
 
         const {
             titulo,
@@ -20,9 +21,15 @@ exports.createTicket = async (req, res) => {
             tipo_usuario
         } = req.body;
 
-        // Parsear datos_contacto desde FormData (solo si NO hay usuario autenticado)
+        // Si hay usuario logueado, usamos sus datos. Si no, usamos lo del body
+        const usuario_id = req.user ? req.user.id : null;
+        const rolUsuario = req.user ? req.user.rol : (tipo_usuario || 'docente');
+
+        // Parsear y validar datos_contacto SOLO para usuarios NO autenticados
         let datos_contacto = null;
         if (!req.user) {
+            // Usuario público - necesitamos validar contacto
+            console.log('⚠️ Public user detected - validating contact data');
             datos_contacto = {
                 nombre_completo: req.body['datos_contacto[nombre_completo]'],
                 email: req.body['datos_contacto[email]'],
@@ -30,16 +37,15 @@ exports.createTicket = async (req, res) => {
                 dpi: req.body['datos_contacto[dpi]']
             };
 
-            // Validar datos de contacto si es público
             if (!datos_contacto?.nombre_completo || !datos_contacto?.email) {
-                console.log('❌ Validation failed: Missing contact data');
+                console.log('❌ Validation failed: Missing contact data for public user');
                 return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
             }
+            console.log('✅ Public user - contact data validated');
+        } else {
+            // Usuario autenticado - ignorar cualquier datos_contacto que venga
+            console.log('✅ Authenticated user - SKIPPING contact data validation entirely');
         }
-
-        // Si hay usuario logueado, usamos sus datos. Si no, usamos lo del body
-        const usuario_id = req.user ? req.user.id : null;
-        const rolUsuario = req.user ? req.user.rol : (tipo_usuario || 'docente');
 
         // Procesar archivos subidos (Cloudinary)
         let archivosGuardados = [];
