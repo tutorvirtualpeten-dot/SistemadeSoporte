@@ -5,17 +5,23 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import LogoImage from '@/components/LogoImage';
+import SecurityModal from '@/components/SecurityModal';
 
 export default function SettingsPage() {
     const [settings, setSettings] = useState<any>({});
     const [loading, setLoading] = useState(false);
+    const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
 
     useEffect(() => {
         api.get('/settings').then(({ data }) => setSettings(data)).catch(console.error);
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSecurityModalOpen(true);
+    };
+
+    const saveSettings = async () => {
         setLoading(true);
         try {
             await api.put('/settings', settings);
@@ -32,7 +38,7 @@ export default function SettingsPage() {
         <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-900">Configuración General</h1>
 
-            <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+            <form onSubmit={handleFormSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
                 <Input
                     label="Nombre de la Aplicación"
                     value={settings.nombre_app || ''}
@@ -61,6 +67,14 @@ export default function SettingsPage() {
                     <Button type="submit" isLoading={loading}>Guardar Cambios</Button>
                 </div>
             </form>
+
+            <SecurityModal
+                isOpen={isSecurityModalOpen}
+                onClose={() => setIsSecurityModalOpen(false)}
+                onConfirm={saveSettings}
+                title="Guardar Configuración"
+                description="Estás a punto de modificar la configuración global del sistema. Esta acción requiere confirmación."
+            />
         </div>
     );
 }

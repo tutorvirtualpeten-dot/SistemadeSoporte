@@ -84,6 +84,24 @@ exports.login = async (req, res) => {
     }
 };
 
+// @desc    Verificar contraseña (step-up auth)
+// @route   POST /api/auth/verify-password
+// @access  Private
+exports.verifyPassword = async (req, res) => {
+    try {
+        const { password } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (user && (await bcrypt.compare(password, user.password))) {
+            res.json({ verified: true });
+        } else {
+            res.status(401).json({ message: 'Contraseña incorrecta' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc    Obtener usuario actual
 // @route   GET /api/auth/me
 // @access  Private

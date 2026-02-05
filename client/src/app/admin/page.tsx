@@ -42,7 +42,7 @@ interface DashboardData {
     charts: {
         byStatus: { _id: string; count: number }[];
         byPriority: { _id: string; count: number }[];
-        byCategory: { _id: string; count: number }[];
+        byUserType: { _id: string; count: number }[];
         dailyTrend: { _id: string; count: number }[];
     };
 }
@@ -95,10 +95,10 @@ export default function AdminDashboardPage() {
         const wsSummary = XLSX.utils.json_to_sheet(summaryData);
         XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen");
 
-        // Hoja Categorías
-        const categoryData = data.charts.byCategory.map(item => ({ Categoria: item._id, Cantidad: item.count }));
-        const wsCat = XLSX.utils.json_to_sheet(categoryData);
-        XLSX.utils.book_append_sheet(wb, wsCat, "Categorias");
+        // Hoja Tipo Usuario
+        const userTypeData = data.charts.byUserType.map(item => ({ Tipo: item._id, Cantidad: item.count }));
+        const wsUserType = XLSX.utils.json_to_sheet(userTypeData);
+        XLSX.utils.book_append_sheet(wb, wsUserType, "TipoUsuario");
 
         XLSX.writeFile(wb, `Reporte_Soporte_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     };
@@ -130,13 +130,13 @@ export default function AdminDashboardPage() {
             headStyles: { fillColor: [41, 128, 185] } // Blue
         });
 
-        // Categories Table
-        const catBody = data.charts.byCategory.map(item => [item._id || 'Sin Categoría', item.count.toString()]);
+        // User Type Table
+        const userTypeBody = data.charts.byUserType.map(item => [item._id || 'Desconocido', item.count.toString()]);
 
         (doc as any).autoTable({
             startY: (doc as any).lastAutoTable.finalY + 15,
-            head: [['Categoría', 'Tickets']],
-            body: catBody,
+            head: [['Tipo de Usuario', 'Tickets']],
+            body: userTypeBody,
             theme: 'striped'
         });
 
@@ -218,12 +218,12 @@ export default function AdminDashboardPage() {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* Tickets by Category - Bar Chart */}
+                {/* Tickets by User Type - Bar Chart */}
                 <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Tickets por Categoría</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Tickets por Tipo de Usuario</h3>
                     <div className="h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data.charts.byCategory}>
+                            <BarChart data={data.charts.byUserType}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="_id" />
                                 <YAxis />

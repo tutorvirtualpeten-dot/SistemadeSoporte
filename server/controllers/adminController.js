@@ -127,23 +127,10 @@ exports.getDashboardStats = async (req, res) => {
             { $group: { _id: '$prioridad', count: { $sum: 1 } } }
         ]);
 
-        // 4. Tickets por Categoría (Para Bar Chart) - Requiere $lookup si category es ObjectId
-        const ticketsByCategory = await Ticket.aggregate([
+        // 4. Tickets por Tipo de Usuario (Docente vs Administrativo)
+        const ticketsByUserType = await Ticket.aggregate([
             { $match: dateFilter },
-            {
-                $lookup: {
-                    from: 'categories',
-                    localField: 'categoria',
-                    foreignField: '_id',
-                    as: 'categoryParams'
-                }
-            },
-            {
-                $group: {
-                    _id: { $arrayElemAt: ['$categoryParams.nombre', 0] }, // Agrupar por nombre de categoría
-                    count: { $sum: 1 }
-                }
-            }
+            { $group: { _id: '$tipo_usuario', count: { $sum: 1 } } }
         ]);
 
 
@@ -169,7 +156,7 @@ exports.getDashboardStats = async (req, res) => {
             charts: {
                 byStatus: ticketsByStatus,
                 byPriority: ticketsByPriority,
-                byCategory: ticketsByCategory,
+                byUserType: ticketsByUserType,
                 dailyTrend: dailyTrend
             }
         });
