@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Soporte Petén',
   description: 'Sistema de Tickets de Soporte',
+  icons: {
+    icon: '/logo_mineduc.jpg',
+  },
 };
 
 export default function RootLayout({
