@@ -97,7 +97,7 @@ exports.updateUser = async (req, res) => {
 // @access  Private (Admin)
 exports.getDashboardStats = async (req, res) => {
     try {
-        const { startDate, endDate } = req.query;
+        const { startDate, endDate, status } = req.query;
         let dateFilter = {};
 
         if (startDate && endDate) {
@@ -107,6 +107,12 @@ exports.getDashboardStats = async (req, res) => {
                     $lte: new Date(endDate)
                 }
             };
+        }
+
+        // Filtro por estado (si se proporciona)
+        if (status) {
+            const statusArray = status.split(',');
+            dateFilter.estado = { $in: statusArray };
         }
 
         // Si es agente, filtrar solo sus tickets asignados
