@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import CommentSection from '@/components/CommentSection';
+import TicketHistory from '@/components/TicketHistory';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Edit2, Save, X, Star } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
@@ -377,6 +378,14 @@ export default function TicketDetailPage() {
                 <div className="border-t border-gray-200 mt-8 pt-8">
                     <CommentSection ticketId={ticket._id} />
                 </div>
+
+                {/* Historial de Actividad (Solo Admins/Agentes) */}
+                {(user?.rol === 'admin' || user?.rol === 'super_admin' || user?.rol === 'agente') && (
+                    <div className="border-t border-gray-200 mt-8 pt-8 px-4 sm:px-6 pb-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-6">Historial de Actividad</h3>
+                        <TicketHistory ticketId={ticket._id} />
+                    </div>
+                )}
             </div>
         </div>
     );

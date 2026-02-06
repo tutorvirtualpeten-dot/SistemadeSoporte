@@ -2,6 +2,8 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const sendEmail = require('../utils/emailService');
 const Notification = require('../models/Notification');
+const logActivity = require('../utils/activityLogger');
+const TicketHistory = require('../models/TicketHistory');
 
 // @desc    Crear nuevo ticket
 // @route   POST /api/tickets
@@ -84,6 +86,14 @@ exports.createTicket = async (req, res) => {
         }));
         if (notificacionesAdmins.length > 0) {
             await Notification.insertMany(notificacionesAdmins);
+        }
+
+        // LOG ACTIVIDAD: Creación
+        if (req.user) {
+            await logActivity(nuevoTicket._id, req.user.id, 'CREACION', { descripcion: 'Ticket creado' });
+        } else {
+            // Si es público, no tenemos ID de usuario real, pero podríamos manejarlo si tuviéramos un usuario "System" o similar. 
+            // Por ahora, solo logueamos si hay usuario autenticado o lo dejamos pendiente.
         }
 
         res.status(201).json(nuevoTicket);
@@ -227,16 +237,12 @@ exports.updateTicket = async (req, res) => {
         const newAgentId = actualizado.agente_id ? actualizado.agente_id._id.toString() : null;
 
         if (newAgentId && newAgentId !== oldAgentId) {
-            // Notificación Email Agente (DESHABILITADO)
-            /*
-            if (actualizado.agente_id && actualizado.agente_id.email) {
-                sendEmail({
-                    to: actualizado.agente_id.email,
-                    subject: `Nuevo Ticket Asignado: #${actualizado.ticket_id}`,
-                    text: `Se te ha asignado el ticket "${actualizado.titulo}". Por favor revísalo en el panel.`
-                }).catch(err => console.error('Error enviando email notificación agente:', err.message));
-            }
-            */
+            // LOG ACTIVIDAD: Asignación
+            await logActivity(actualizado._id, req.user.id, 'ASIGNACION', {
+                anterior: oldAgentId,
+                nuevo: newAgentId,
+                descripcion: `Agente asignado: ${actualizado.agente_id.nombre}`
+            });
 
             // Notificación Interna al Nuevo Agente
             await Notification.create({
@@ -245,6 +251,24 @@ exports.updateTicket = async (req, res) => {
                 title: `Ticket Asignado #${actualizado.ticket_id}`,
                 message: `Se te ha asignado el ticket: "${actualizado.titulo}"`,
                 link: `/portal/tickets/${actualizado._id}`
+            });
+        }
+
+        // LOG ACTIVIDAD: Cambio de Estado
+        if (req.body.estado && req.body.estado !== ticket.estado) {
+            await logActivity(actualizado._id, req.user.id, 'CAMBIO_ESTADO', {
+                anterior: ticket.estado,
+                nuevo: req.body.estado,
+                descripcion: `Estado cambiado a ${req.body.estado}`
+            });
+        }
+
+        // LOG ACTIVIDAD: Cambio de Prioridad
+        if (req.body.prioridad && req.body.prioridad !== ticket.prioridad) {
+            await logActivity(actualizado._id, req.user.id, 'CAMBIO_PRIORIDAD', {
+                anterior: ticket.prioridad,
+                nuevo: req.body.prioridad,
+                descripcion: `Prioridad cambiada a ${req.body.prioridad}`
             });
         }
 
@@ -363,6 +387,21 @@ exports.deleteTicket = async (req, res) => {
 
         await ticket.deleteOne();
         res.json({ message: 'Ticket eliminado' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Obtener historial del ticket
+// @route   GET /api/tickets/:id/history
+// @access  Private
+exports.getTicketHistory = async (req, res) => {
+    try {
+        const history = await TicketHistory.find({ ticket_id: req.params.id })
+            .populate('usuario_id', 'nombre email')
+            .sort({ fecha: -1 });
+
+        res.json(history);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

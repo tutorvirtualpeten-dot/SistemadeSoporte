@@ -8,11 +8,13 @@ const {
     deleteTicket,
     getTicketStatus,
     addPublicComment,
-    rateTicket
+    rateTicket,
+    getTicketHistory
 } = require('../controllers/ticketController');
 const { protect } = require('../middleware/authMiddleware');
 const { optionalAuth } = require('../middleware/optionalAuth');
 
+router.get('/:id/history', protect, getTicketHistory); // Ruta historial
 router.get('/status/:id', getTicketStatus); // Ruta pública de consulta
 router.post('/public/comment/:id', addPublicComment); // Ruta pública de comentario
 router.put('/public/rate/:id', rateTicket); // Ruta pública de calificación
