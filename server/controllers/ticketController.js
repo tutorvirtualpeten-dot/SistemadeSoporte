@@ -2,6 +2,7 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const sendEmail = require('../utils/emailService');
 const Notification = require('../models/Notification');
+const notifyUser = require('../utils/notifyUser');
 const logActivity = require('../utils/activityLogger');
 const TicketHistory = require('../models/TicketHistory');
 
@@ -77,16 +78,15 @@ exports.createTicket = async (req, res) => {
 
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
         const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
-        const notificacionesAdmins = admins.map(admin => ({
-            recipient_id: admin._id,
-            type: 'ticket_new',
-            title: `Nuevo Ticket #${nuevoTicket.ticket_id}`,
-            message: `${nuevoTicket.datos_contacto?.nombre_completo || 'Usuario'} ha creado: "${titulo}"`,
-            link: `/portal/tickets/${nuevoTicket._id}` // Link para admin
-        }));
-        if (notificacionesAdmins.length > 0) {
-            await Notification.insertMany(notificacionesAdmins);
-        }
+        admins.forEach(admin => {
+            notifyUser(
+                admin._id,
+                'NEW_TICKET',
+                `Nuevo Ticket #${nuevoTicket.ticket_id}`,
+                `${nuevoTicket.datos_contacto?.nombre_completo || 'Usuario'} ha creado: "${titulo}"`,
+                `/portal/tickets/${nuevoTicket._id}`
+            );
+        });
 
         // LOG ACTIVIDAD: Creación
         if (req.user) {
@@ -221,13 +221,13 @@ exports.updateTicket = async (req, res) => {
 
             // Notifiación Interna al Usuario (si no fue él quien lo cambió)
             if (actualizado.usuario_id && req.user.id !== actualizado.usuario_id._id.toString()) {
-                await Notification.create({
-                    recipient_id: actualizado.usuario_id._id,
-                    type: 'ticket_update',
-                    title: `Actualización #${actualizado.ticket_id}`,
-                    message: `Tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}`,
-                    link: `/portal/tickets/${actualizado._id}`
-                });
+                await notifyUser(
+                    actualizado.usuario_id._id,
+                    'TICKET_STATUS_CHANGED',
+                    `Actualización Ticket #${actualizado.ticket_id}`,
+                    `Tu ticket ha cambiado a: ${actualizado.estado.toUpperCase()}`,
+                    `/portal/tickets/${actualizado._id}`
+                );
             }
         }
 
@@ -245,13 +245,13 @@ exports.updateTicket = async (req, res) => {
             });
 
             // Notificación Interna al Nuevo Agente
-            await Notification.create({
-                recipient_id: newAgentId,
-                type: 'ticket_assigned',
-                title: `Ticket Asignado #${actualizado.ticket_id}`,
-                message: `Se te ha asignado el ticket: "${actualizado.titulo}"`,
-                link: `/portal/tickets/${actualizado._id}`
-            });
+            await notifyUser(
+                newAgentId,
+                'TICKET_ASSIGNED',
+                `Asignación Ticket #${actualizado.ticket_id}`,
+                `Se te ha asignado el ticket: "${actualizado.titulo}"`,
+                `/portal/tickets/${actualizado._id}`
+            );
         }
 
         // LOG ACTIVIDAD: Cambio de Estado

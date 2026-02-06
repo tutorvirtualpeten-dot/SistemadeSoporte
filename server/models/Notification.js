@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
-    recipient_id: {
+    recipient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     type: {
         type: String,
-        enum: ['ticket_new', 'ticket_update', 'ticket_assigned', 'system'],
+        enum: ['TICKET_ASSIGNED', 'TICKET_UPDATED', 'NEW_TICKET', 'TICKET_STATUS_CHANGED', 'SYSTEM'],
         required: true
     },
     title: {
@@ -20,7 +20,8 @@ const notificationSchema = new mongoose.Schema({
         required: true
     },
     link: {
-        type: String // URL relativa para redirigir, ej: /portal/tickets/5
+        type: String, // Relative URL
+        required: false
     },
     read: {
         type: Boolean,
@@ -28,7 +29,8 @@ const notificationSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        expires: 60 * 60 * 24 * 30 // TTL: 30 days
     }
 });
 
