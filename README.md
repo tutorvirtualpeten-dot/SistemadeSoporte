@@ -48,3 +48,4 @@ Diseñado para instituciones educativas, permitiendo la gestión eficiente de so
 
 ---
 Desarrollado para Soporte Petén.
+Por. Ing. Alex Alberto Canek Romero
