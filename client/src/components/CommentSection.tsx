@@ -33,7 +33,7 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
     };
 
     useEffect(() => {
-        if (user && (user.rol === 'admin' || user.rol === 'agente')) {
+        if (user && (user.rol === 'admin' || user.rol === 'agente' || user.rol === 'super_admin')) {
             api.get('/canned-responses').then(res => setCannedResponses(res.data)).catch(console.error);
         }
     }, [user]);
@@ -122,7 +122,7 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
 
                     <div className="bg-gray-50 px-4 py-2 flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                            {(user?.rol === 'admin' || user?.rol === 'agente') && (
+                            {(user?.rol === 'admin' || user?.rol === 'agente' || user?.rol === 'super_admin') && (
                                 <>
                                     <div className="relative">
                                         <button
