@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
+import { Zap } from 'lucide-react';
 
 interface Comment {
     _id: string;
@@ -19,6 +20,8 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
     const [newComment, setNewComment] = useState('');
     const [loading, setLoading] = useState(false);
     const [isInternal, setIsInternal] = useState(false);
+    const [cannedResponses, setCannedResponses] = useState<{ _id: string, titulo: string, contenido: string }[]>([]);
+    const [showCanned, setShowCanned] = useState(false);
 
     const fetchComments = async () => {
         try {
@@ -28,6 +31,12 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
             console.error(error);
         }
     };
+
+    useEffect(() => {
+        if (user && (user.rol === 'admin' || user.rol === 'agente')) {
+            api.get('/canned-responses').then(res => setCannedResponses(res.data)).catch(console.error);
+        }
+    }, [user]);
 
     useEffect(() => {
         fetchComments();
@@ -112,17 +121,51 @@ export default function CommentSection({ ticketId }: { ticketId: string }) {
                     />
 
                     <div className="bg-gray-50 px-4 py-2 flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-4">
                             {(user?.rol === 'admin' || user?.rol === 'agente') && (
-                                <label className="flex items-center space-x-2 text-sm text-gray-600">
-                                    <input
-                                        type="checkbox"
-                                        checked={isInternal}
-                                        onChange={(e) => setIsInternal(e.target.checked)}
-                                        className="rounded text-blue-600 focus:ring-blue-500"
-                                    />
-                                    <span>Nota interna (Privada)</span>
-                                </label>
+                                <>
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCanned(!showCanned)}
+                                            className="text-gray-500 hover:text-yellow-600 focus:outline-none"
+                                            title="Respuestas Rápidas"
+                                        >
+                                            <Zap className="h-5 w-5" />
+                                        </button>
+                                        {showCanned && (
+                                            <div className="absolute bottom-full left-0 mb-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-10 max-h-60 overflow-y-auto">
+                                                <ul className="py-1">
+                                                    {cannedResponses.map(cr => (
+                                                        <li
+                                                            key={cr._id}
+                                                            onClick={() => {
+                                                                setNewComment(prev => prev + (prev ? '\n' : '') + cr.contenido);
+                                                                setShowCanned(false);
+                                                            }}
+                                                            className="px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 cursor-pointer truncate"
+                                                        >
+                                                            {cr.titulo}
+                                                        </li>
+                                                    ))}
+                                                    {cannedResponses.length === 0 && (
+                                                        <li className="px-4 py-2 text-xs text-gray-400">Sin respuestas configuradas</li>
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <label className="flex items-center space-x-2 text-sm text-gray-600">
+                                        <input
+                                            type="checkbox"
+                                            checked={isInternal}
+                                            onChange={(e) => setIsInternal(e.target.checked)}
+                                            className="rounded text-blue-600 focus:ring-blue-500"
+                                        />
+                                        <span>Nota interna (Privada)</span>
+                                    </label>
+                                </>
                             )}
                         </div>
                         <Button type="submit" isLoading={loading} disabled={!newComment.trim()}>
