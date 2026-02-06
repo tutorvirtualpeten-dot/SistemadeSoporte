@@ -97,27 +97,32 @@ exports.updateUser = async (req, res) => {
 // @access  Private (Admin)
 exports.getDashboardStats = async (req, res) => {
     try {
-        const { startDate, endDate, status } = req.query;
+        const { startDate, endDate, status, agentId } = req.query;
         let dateFilter = {};
 
         if (startDate && endDate) {
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
             dateFilter = {
                 createdAt: {
                     $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $lte: end
                 }
             };
         }
 
-        // Filtro por estado (si se proporciona)
+        // Filtro por estado
         if (status) {
             const statusArray = status.split(',');
             dateFilter.estado = { $in: statusArray };
         }
 
-        // Si es agente, filtrar solo sus tickets asignados
+        // Si es agente, filtrar solo sus tickets. Si es admin y envía agentId, filtrar por ese agente.
         if (req.user.rol === 'agente') {
             dateFilter = { ...dateFilter, agente_id: req.user._id };
+        } else if (agentId) {
+            dateFilter = { ...dateFilter, agente_id: agentId };
         }
 
         // 1. Resumen General (KPIs)

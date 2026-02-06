@@ -58,12 +58,17 @@ export default function AdminDashboardPage() {
     });
     // Default: mostrar solo abiertos y en proceso
     const [statusFilter, setStatusFilter] = useState<string[]>(['abierto', 'en_progreso']);
+    const [agents, setAgents] = useState<{ _id: string; nombre: string }[]>([]);
+    const [selectedAgent, setSelectedAgent] = useState('');
 
     const fetchStats = async () => {
         setLoading(true);
         try {
             const statusQuery = statusFilter.join(',');
-            const res = await api.get(`/admin/stats?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&status=${statusQuery}`);
+            let query = `/admin/stats?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&status=${statusQuery}`;
+            if (selectedAgent) query += `&agentId=${selectedAgent}`;
+
+            const res = await api.get(query);
             setData(res.data);
         } catch (error) {
             console.error(error);
@@ -72,9 +77,19 @@ export default function AdminDashboardPage() {
         }
     };
 
+    const fetchAgents = async () => {
+        try {
+            const res = await api.get('/admin/agents');
+            setAgents(res.data);
+        } catch (error) {
+            console.error('Error fetching agents:', error);
+        }
+    };
+
     useEffect(() => {
         fetchStats();
-    }, [statusFilter]);
+        fetchAgents();
+    }, [statusFilter, selectedAgent]);
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
@@ -180,6 +195,22 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 bg-white p-2 rounded-lg shadow text-sm">
+                    {agents.length > 0 && (
+                        <select
+                            value={selectedAgent}
+                            onChange={(e) => setSelectedAgent(e.target.value)}
+                            className="border-none focus:ring-0 text-gray-600 p-0 text-sm max-w-[150px]"
+                        >
+                            <option value="">Todos los Agentes</option>
+                            {agents.map((agent) => (
+                                <option key={agent._id} value={agent._id}>
+                                    {agent.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    {agents.length > 0 && <div className="h-4 w-px bg-gray-300 mx-1"></div>}
+
                     <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-500" />
                         <input
