@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -25,6 +25,7 @@ export default function AdminSidebar() {
         { name: 'Categorías', href: '/admin/categories', icon: Files, roles: ['admin', 'super_admin'] },
         { name: 'FAQs', href: '/admin/faqs', icon: HelpCircle, roles: ['admin', 'super_admin'] },
         { name: 'Respuestas', href: '/admin/responses', icon: Files, roles: ['admin', 'super_admin'] },
+        { name: 'Auditoría', href: '/admin/audit', icon: ShieldCheck, roles: ['super_admin'] },
         { name: 'Configuración', href: '/admin/settings', icon: Settings, roles: ['admin', 'super_admin'] },
     ];
 

@@ -1,5 +1,6 @@
 const Setting = require('../models/Setting');
 const sendEmail = require('../utils/emailService');
+const logSystem = require('../utils/systemLogger');
 
 // @desc    Obtener configuración
 // @route   GET /api/settings
@@ -32,6 +33,9 @@ exports.updateSettings = async (req, res) => {
         );
 
         console.log('Settings updated via findOneAndUpdate:', updated);
+
+        await logSystem(req.user._id, 'UPDATE_SETTINGS', { changes: req.body }, req);
+
         res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });

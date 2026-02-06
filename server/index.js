@@ -34,6 +34,7 @@ app.use('/api/faqs', require('./routes/faqRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/canned-responses', require('./routes/cannedResponseRoutes'));
+app.use('/api/audit', require('./routes/auditRoutes'));
 
 
 

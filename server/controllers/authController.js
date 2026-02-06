@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const logSystem = require('../utils/systemLogger');
 
 // Generar Token JWT
 const generateToken = (id) => {
@@ -76,6 +77,9 @@ exports.login = async (req, res) => {
                 telefono: user.telefono,
                 token: generateToken(user._id),
             });
+
+            // LOG SYSTEM: Login exitoso
+            await logSystem(user._id, 'LOGIN', { email: user.email, rol: user.rol, nombre: user.nombre }, req);
         } else {
             res.status(401).json({ message: 'Email o contraseña inválidos' });
         }

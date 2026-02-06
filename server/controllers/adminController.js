@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Ticket = require('../models/Ticket');
 const bcrypt = require('bcryptjs');
+const logSystem = require('../utils/systemLogger');
 
 // @desc    Obtener todos los usuarios
 // @route   GET /api/admin/users
@@ -42,6 +43,8 @@ exports.createUser = async (req, res) => {
             email: user.email,
             rol: user.rol
         });
+
+        await logSystem(req.user._id, 'CREATE_USER', { target: user.email, rol: user.rol }, req);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -53,6 +56,7 @@ exports.createUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         await User.findByIdAndDelete(req.params.id);
+        await logSystem(req.user._id, 'DELETE_USER', { targetId: req.params.id }, req);
         res.json({ message: 'Usuario eliminado' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -87,6 +91,8 @@ exports.updateUser = async (req, res) => {
             email: updatedUser.email,
             rol: updatedUser.rol
         });
+
+        await logSystem(req.user._id, 'UPDATE_USER', { target: updatedUser.email, changes: req.body }, req);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
