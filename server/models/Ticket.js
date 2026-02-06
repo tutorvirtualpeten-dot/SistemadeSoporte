@@ -15,15 +15,18 @@ const ticketSchema = new mongoose.Schema({
         enum: ['abierto', 'en_progreso', 'resuelto', 'cerrado'],
         default: 'abierto'
     },
+    // Prioridad para SLA (Service Level Agreement)
     prioridad: {
         type: String,
         enum: ['baja', 'media', 'alta', 'critica'],
         default: 'media'
     },
+    // Usuario que reporta el problema (si es autenticado)
     usuario_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    // Agente técnico asignado
     agente_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
@@ -43,6 +46,7 @@ const ticketSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     },
+    // Adjuntos (Imágenes/PDFs) subidos a Cloudinary/S3
     archivos: [{
         url: String,
         public_id: String,

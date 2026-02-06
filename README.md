@@ -1,64 +1,50 @@
 # Sistema de Soporte Petén (HelpDesk)
 
-Este es un sistema de tickets de soporte basado en el stack MERN (MongoDB, Express, React/Next.js, Node.js).
+Sistema integral de gestión de tickets de soporte técnico desarrollado con MERN Stack (MongoDB, Express, React, Node.js).
+Diseñado para instituciones educativas, permitiendo la gestión eficiente de solicitudes de docentes y personal administrativo.
 
-## Requisitos Previos
+## 🚀 Características Principales
 
-- **Node.js**: Instalado (v18 o superior).
-- **MongoDB**: Debe estar ejecutándose localmente en el puerto 27017 (o configurar `MONGODB_URI` en `.env`).
+### Gestión de Tickets
+- **Creación de Tickets:** Interfaz sencilla para usuarios (docentes/administrativos) y pública.
+- **Asignación Automática:** Los administradores pueden asignar agentes a casos específicos.
+- **Estados y Prioridades:** Flujo de trabajo claro (Abierto, En Progreso, Resuelto, Cerrado).
 
-## Instalación y Ejecución
+### Herramientas de Productividad (Nuevo 🌟)
+- **Respuestas Rápidas (Canned Responses):** Plantillas predefinidas para responder preguntas frecuentes con un clic.
+- **Historial de Actividad (Audit Log):** Registro detallado de cada cambio en un ticket (quién, qué y cuándo).
+- **Notificaciones Internas:** Sistema de alertas (campanita) para avisar a agentes y usuarios sobre actualizaciones en tiempo real.
 
-### 1. Iniciar el Backend (Servidor)
+### Administración y Seguridad
+- **Roles de Usuario:** Super Admin, Admin, Agente, Docente.
+- **Auditoría del Sistema (System Log):** Panel de seguridad que registra inicios de sesión, cambios de configuración y gestión de usuarios.
+- **Protección de Rutas:** Middleware de autenticación robusto basado en JWT.
 
-Abre una terminal y ejecuta:
+## 🔮 Hoja de Ruta (Futuro)
+- [ ] **Integración con WhatsApp (Two-Way):** Módulo para recibir y responder tickets directamente desde WhatsApp usando la Cloud API.
+- [ ] **Reportes Avanzados:** Gráficos de rendimiento por agente y tiempos de resolución.
 
-```bash
-cd server
-npm install # Si no lo has hecho
-npm run dev
-```
+## 🛠 Instalación y Despliegue
 
-El servidor iniciará en **http://localhost:5000**.
+### Requisitos
+- Node.js v14+
+- MongoDB (Atlas o Local)
 
-### 2. Iniciar el Frontend (Cliente)
+### Pasos
+1. Clonar el repositorio.
+2. Instalar dependencias:
+   ```bash
+   cd server && npm install
+   cd ../client && npm install
+   ```
+3. Configurar variables de entorno (`.env`).
+4. Iniciar servidores:
+   ```bash
+   # Backend
+   cd server && npm run dev
+   # Frontend
+   cd client && npm run dev
+   ```
 
-Abre **otra** terminal y ejecuta:
-
-```bash
-cd client
-npm install # Si no lo has hecho
-npm run dev
-```
-
-El cliente web iniciará en **http://localhost:3000**.
-
-## Credenciales Iniciales
-
-El sistema no tiene usuarios por defecto.
-1. Ve a `http://localhost:3000/auth/register`.
-2. Registra un nuevo usuario.
-   - Selecciona rol "Docente" o "Administrativo" para ver el portal de usuario.
-3. Para crear un **Administrador**:
-   - Puedes registrar un usuario y luego cambiar manualmente su rol a `admin` en la base de datos (usando MongoDB Compass).
-   - O usar la API directa si tienes postman.
-   - *Nota: En producción, deberías tener un script de seed.*
-
-## Funcionalidades
-
-- **Portal de Usuario**: Crear tickets, ver historial, comentar.
-- **Admin**: Dashboard de métricas, gestión de usuarios (técnicos), configuración global.
-
-## Actualizaciones Recientes (Enero 2026)
-
-### Correcciones Móviles y Admin
-- **Acceso Móvil**: Se habilitó el acceso desde dispositivos móviles configurando `NEXT_PUBLIC_API_URL`.
-- **Panel Admin Responsivo**: 
-    - Se arregló el menú lateral en móviles.
-    - Se añadió desplazamiento horizontal (scroll) en tablas de Tickets, Usuarios, Categorías y FAQs.
-    - Se mejoró la fluidez del scroll y barras de desplazamiento.
-
-### Sincronización y Despliegue
-- **GitHub**: Repositorio configurado en `https://github.com/tutorvirtualpeten-dot/SistemadeSoporte`.
-- **Sincronización Automática**: Ejecuta el archivo `sincronizar.bat` para guardar y subir cambios a la nube con un solo clic.
-- **Despliegue en la Nube**: Consulta la `Guía de Despliegue.md` (o deployment_guide.md si se generó) para subir el proyecto a Vercel y Render (Hosting Gratis).
+---
+Desarrollado para Soporte Petén.

@@ -6,6 +6,15 @@ const notifyUser = require('../utils/notifyUser');
 const logActivity = require('../utils/activityLogger');
 const TicketHistory = require('../models/TicketHistory');
 
+/**
+ * @desc    Crear un nuevo ticket de soporte
+ * @route   POST /api/tickets
+ * @access  Private (Docente/Administrativo) o Public (si no auth)
+ * @param   {string} titulo - Título breve del problema
+ * @param   {string} descripcion - Descripción detallada
+ * @param   {string} categoria_id - ID de la categoría del problema
+ * @param   {string} prioridad - Nivel de urgencia (baja, media, alta)
+ */
 // @desc    Crear nuevo ticket
 // @route   POST /api/tickets
 // @access  Private (Docente/Administrativo)
@@ -102,6 +111,12 @@ exports.createTicket = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Obtener lista de tickets (filtrado por rol)
+ * @route   GET /api/tickets
+ * @access  Private
+ * @returns {Array} Lista de tickets (Admins ven todos, Usuarios ven los propios)
+ */
 // @desc    Obtener todos los tickets
 // @route   GET /api/tickets
 // @access  Private
@@ -129,6 +144,12 @@ exports.getTickets = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Obtener detalles de un ticket específico
+ * @route   GET /api/tickets/:id
+ * @access  Private (Dueño, Admin, Agente)
+ * @param   {string} id - ID único del ticket (MongoDB _id)
+ */
 // @desc    Obtener un ticket por ID
 // @route   GET /api/tickets/:id
 // @access  Private
@@ -169,6 +190,13 @@ exports.getTicketById = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Actualizar un ticket existente (estado, asignación, contenido)
+ * @route   PUT /api/tickets/:id
+ * @access  Private (Agente/Admin/Dueño)
+ * @param   {string} id - ID del ticket
+ * @param   {Object} body - Campos a actualizar (estado, prioridad, agente_id, etc.)
+ */
 // @desc    Actualizar ticket
 // @route   PUT /api/tickets/:id
 // @access  Private (Agente/Admin)
@@ -278,6 +306,12 @@ exports.updateTicket = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Consultar estado público de un ticket
+ * @route   GET /api/tickets/status/:id
+ * @access  Public
+ * @param   {number} id - ID numérico (ticket_id) para consulta fácil
+ */
 // @desc    Obtener estado de ticket (Público)
 // @route   GET /api/tickets/status/:id
 // @access  Public

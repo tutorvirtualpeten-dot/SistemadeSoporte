@@ -10,6 +10,15 @@ const generateToken = (id) => {
     });
 };
 
+/**
+ * @desc    Registrar un nuevo usuario en el sistema
+ * @route   POST /api/auth/register
+ * @access  Public (Puede ser restringido a Admin en el futuro)
+ * @param   {string} nombre - Nombre completo del usuario
+ * @param   {string} email - Correo electrónico único
+ * @param   {string} password - Contraseña (mínimo 6 caracteres)
+ * @param   {string} rol - Rol del usuario (admin, agente, docente, administrativo)
+ */
 // @desc    Registrar un nuevo usuario
 // @route   POST /api/auth/register
 // @access  Public (o Admin en futuro)
@@ -57,6 +66,14 @@ exports.register = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Autenticar usuario y generar token JWT
+ * @route   POST /api/auth/login
+ * @access  Public
+ * @param   {string} email - Correo electrónico del usuario
+ * @param   {string} password - Contraseña del usuario
+ * @returns {Object} Datos del usuario y token JWT
+ */
 // @desc    Autenticar usuario & obtener token
 // @route   POST /api/auth/login
 // @access  Public
@@ -88,6 +105,13 @@ exports.login = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Verificar contraseña actual (Auth Step-Up)
+ * @route   POST /api/auth/verify-password
+ * @access  Private (Requiere token válido)
+ * @param   {string} password - Contraseña a verificar
+ * @returns {Object} verified: true si es correcta
+ */
 // @desc    Verificar contraseña (step-up auth)
 // @route   POST /api/auth/verify-password
 // @access  Private
@@ -106,6 +130,12 @@ exports.verifyPassword = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Obtener datos del usuario autenticado actual
+ * @route   GET /api/auth/me
+ * @access  Private
+ * @returns {Object} Datos del usuario (sin password)
+ */
 // @desc    Obtener usuario actual
 // @route   GET /api/auth/me
 // @access  Private

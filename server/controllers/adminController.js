@@ -3,6 +3,12 @@ const Ticket = require('../models/Ticket');
 const bcrypt = require('bcryptjs');
 const logSystem = require('../utils/systemLogger');
 
+/**
+ * @desc    Obtener lista de todos los usuarios
+ * @route   GET /api/admin/users
+ * @access  Private (Admin/SuperAdmin)
+ * @returns {Array} Lista de usuarios (excluyendo passwords)
+ */
 // @desc    Obtener todos los usuarios
 // @route   GET /api/admin/users
 // @access  Private (Admin)
@@ -15,6 +21,15 @@ exports.getUsers = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Crear un nuevo usuario por parte del administrador
+ * @route   POST /api/admin/users
+ * @access  Private (Admin/SuperAdmin)
+ * @param   {string} nombre - Nombre completo
+ * @param   {string} email - Correo electrónico
+ * @param   {string} password - Contraseña
+ * @param   {string} rol - Rol asignado
+ */
 // @desc    Crear usuario (Técnico/Admin)
 // @route   POST /api/admin/users
 // @access  Private (Admin)
@@ -50,6 +65,12 @@ exports.createUser = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Eliminar un usuario del sistema (Lógico o Físico)
+ * @route   DELETE /api/admin/users/:id
+ * @access  Private (Admin)
+ * @param   {string} id - ID del usuario a eliminar
+ */
 // @desc    Borrar usuario
 // @route   DELETE /api/admin/users/:id
 // @access  Private (Admin)
@@ -63,6 +84,11 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Actualizar información de un usuario
+ * @route   PUT /api/admin/users/:id
+ * @access  Private (Admin)
+ */
 // @desc    Actualizar usuario
 // @route   PUT /api/admin/users/:id
 // @access  Private (Admin)
@@ -98,6 +124,12 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Obtener métricas y estadísticas para el dashboard
+ * @route   GET /api/admin/stats
+ * @access  Private (Admin)
+ * @returns {Object} { summary, charts }
+ */
 // @desc    Obtener estadísticas avanzadas del dashboard
 // @route   GET /api/admin/stats
 // @access  Private (Admin)

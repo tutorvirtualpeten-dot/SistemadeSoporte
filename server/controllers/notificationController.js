@@ -1,5 +1,11 @@
 const Notification = require('../models/Notification');
 
+/**
+ * @desc    Obtener notificaciones del usuario autenticado
+ * @route   GET /api/notifications
+ * @access  Private
+ * @returns {Object} { notifications: [], unreadCount: number }
+ */
 // @desc    Obtener notificaciones del usuario actual
 // @route   GET /api/notifications
 // @access  Private
@@ -23,6 +29,12 @@ exports.getNotifications = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Marcar una notificación específica como leída
+ * @route   PUT /api/notifications/:id/read
+ * @access  Private
+ * @param   {string} id - ID de la notificación
+ */
 // @desc    Marcar notificación como leída
 // @route   PUT /api/notifications/:id/read
 // @access  Private
