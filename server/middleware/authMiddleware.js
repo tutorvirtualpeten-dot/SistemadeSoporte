@@ -46,4 +46,12 @@ const superAdminOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, adminOnly, superAdminOnly };
+const agentOrAdmin = (req, res, next) => {
+    if (req.user && (req.user.rol === 'agente' || req.user.rol === 'admin' || req.user.rol === 'super_admin')) {
+        next();
+    } else {
+        res.status(401).json({ message: 'No autorizado como staff' });
+    }
+};
+
+module.exports = { protect, adminOnly, superAdminOnly, agentOrAdmin };

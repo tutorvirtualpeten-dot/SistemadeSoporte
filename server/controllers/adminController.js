@@ -109,6 +109,11 @@ exports.getDashboardStats = async (req, res) => {
             };
         }
 
+        // Si es agente, filtrar solo sus tickets asignados
+        if (req.user.rol === 'agente') {
+            dateFilter = { ...dateFilter, agente_id: req.user._id };
+        }
+
         // 1. Resumen General (KPIs)
         const totalTickets = await Ticket.countDocuments(dateFilter);
         const pendientes = await Ticket.countDocuments({ ...dateFilter, estado: 'abierto' });
