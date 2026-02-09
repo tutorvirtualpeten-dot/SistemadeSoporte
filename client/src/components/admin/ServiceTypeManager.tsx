@@ -81,24 +81,30 @@ export default function ServiceTypeManager() {
         <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Tipos de Servicio</h2>
 
-            <div className="flex flex-col md:flex-row gap-2 mb-6">
-                <input
-                    type="text"
-                    value={newType.nombre}
-                    onChange={(e) => setNewType({ ...newType, nombre: e.target.value })}
-                    placeholder="Nombre (ej. Mantenimiento)"
-                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border"
-                />
-                <input
-                    type="text"
-                    value={newType.descripcion}
-                    onChange={(e) => setNewType({ ...newType, descripcion: e.target.value })}
-                    placeholder="Descripción (opcional)"
-                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border"
-                />
+            <div className="flex flex-col md:flex-row gap-4 mb-6 items-end">
+                <div className="flex-1 w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <input
+                        type="text"
+                        value={newType.nombre}
+                        onChange={(e) => setNewType({ ...newType, nombre: e.target.value })}
+                        placeholder="Ej. Mantenimiento"
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border h-10"
+                    />
+                </div>
+                <div className="flex-1 w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <input
+                        type="text"
+                        value={newType.descripcion}
+                        onChange={(e) => setNewType({ ...newType, descripcion: e.target.value })}
+                        placeholder="Ej. Impresora (Opcional)"
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border h-10"
+                    />
+                </div>
                 <button
                     onClick={handleAdd}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center whitespace-nowrap flex-shrink-0"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center whitespace-nowrap h-10 mb-[1px]"
                 >
                     <Plus className="h-4 w-4 mr-1" />
                     Agregar
