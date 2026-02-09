@@ -25,17 +25,37 @@ mongoose.connect(MONGODB_URI)
     .catch(err => console.error('❌ Error conectando a MongoDB:', err));
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/tickets', require('./routes/ticketRoutes'));
-app.use('/api/comments', require('./routes/commentRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/settings', require('./routes/settingRoutes'));
-app.use('/api/faqs', require('./routes/faqRoutes'));
-app.use('/api/categories', require('./routes/categoryRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/canned-responses', require('./routes/cannedResponseRoutes'));
-app.use('/api/audit', require('./routes/auditRoutes'));
+const authRoutes = require('./routes/authRoutes');
+// const userRoutes = require('./routes/userRoutes'); // Missing file
+const ticketRoutes = require('./routes/ticketRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const settingRoutes = require('./routes/settingRoutes');
+const faqRoutes = require('./routes/faqRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const cannedResponseRoutes = require('./routes/cannedResponseRoutes');
+const auditRoutes = require('./routes/auditRoutes');
+// const reportRoutes = require('./routes/reportRoutes'); // Missing file
+// const statsRoutes = require('./routes/statsRoutes'); // Missing file
+const ticketSourceRoutes = require('./routes/ticketSourceRoutes');
+const serviceTypeRoutes = require('./routes/serviceTypeRoutes');
 
+app.use('/api/auth', authRoutes);
+// app.use('/api/users', userRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/settings', settingRoutes);
+app.use('/api/faqs', faqRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/canned-responses', cannedResponseRoutes);
+app.use('/api/audit', auditRoutes);
+// app.use('/api/reports', reportRoutes);
+// app.use('/api/stats', statsRoutes);
+app.use('/api/ticket-sources', ticketSourceRoutes);
+app.use('/api/service-types', serviceTypeRoutes);
 
 
 app.get('/', (req, res) => {

@@ -30,39 +30,64 @@ exports.createTicket = async (req, res) => {
             descripcion,
             prioridad,
             categoria_id,
-            tipo_usuario
+            tipo_usuario,
+            // Nuevos campos para tickets internos
+            source_id,
+            service_type_id,
+            estado, // Permitir definir estado inicial (ej. resuelto)
+            solicitante_id, // ID del usuario si es un ticket interno para un usuario existente
+            datos_contacto: datosContactoBody // Datos de contacto si es para un invitado
         } = req.body;
 
-        // Si hay usuario logueado, usamos sus datos. Si no, usamos lo del body
-        const usuario_id = req.user ? req.user.id : null;
-        const rolUsuario = req.user ? req.user.rol : (tipo_usuario || 'docente');
+        // Determinar quién está creando el ticket
+        const isAgentOrAdmin = req.user && ['admin', 'super_admin', 'agente'].includes(req.user.rol);
+        const creado_por_id = isAgentOrAdmin ? req.user.id : null;
 
-        // Parsear y validar datos_contacto SOLO para usuarios NO autenticados
+        let usuario_id = null;
+        let rolUsuario = 'docente'; // Default
         let datos_contacto = null;
-        if (!req.user) {
-            // Usuario público - necesitamos validar contacto
-            console.log('⚠️ Public user detected - validating contact data');
 
-            // Ahora que enviamos JSON, datos_contacto es un objeto anidado
-            const contactoData = req.body.datos_contacto || {};
+        if (isAgentOrAdmin) {
+            // Lógica para Ticket Interno (creado por Agente/Admin)
+            if (solicitante_id) {
+                // Caso A: Para un usuario registrado existente
+                usuario_id = solicitante_id;
+                const solicitante = await User.findById(solicitante_id);
+                if (solicitante) rolUsuario = solicitante.rol;
+            } else {
+                // Caso B: Para un invitado/externo (usar datos_contacto)
+                const contactoData = datosContactoBody || {};
+                datos_contacto = {
+                    nombre_completo: contactoData.nombre_completo,
+                    email: contactoData.email,
+                    telefono: contactoData.telefono,
+                    dpi: contactoData.dpi
+                };
 
+                // Validación básica para contacto
+                if (!datos_contacto.nombre_completo) {
+                    return res.status(400).json({ message: 'Nombre del solicitante es requerido para tickets internos de invitados.' });
+                }
+                rolUsuario = tipo_usuario || 'docente'; // O lo que seleccione el agente
+            }
+
+        } else if (req.user) {
+            // Lógica estándar: Usuario autenticado crea su propio ticket
+            usuario_id = req.user.id;
+            rolUsuario = req.user.rol;
+        } else {
+            // Lógica estándar: Usuario público (sin login)
+            const contactoData = datosContactoBody || {};
             datos_contacto = {
                 nombre_completo: contactoData.nombre_completo,
                 email: contactoData.email,
                 telefono: contactoData.telefono,
                 dpi: contactoData.dpi
             };
-
             if (!datos_contacto.nombre_completo || !datos_contacto.email) {
-                console.log('❌ Validation failed: Missing contact data for public user');
                 return res.status(400).json({ message: 'Nombre y Email son requeridos para tickets públicos' });
             }
-            console.log('✅ Public user - contact data validated');
-        } else {
-            // Usuario autenticado - ignorar cualquier datos_contacto que venga
-            console.log('✅ Authenticated user - SKIPPING contact data validation entirely');
         }
-
 
         console.log('💾 Creating ticket in database...');
         const nuevoTicket = await Ticket.create({
@@ -72,22 +97,19 @@ exports.createTicket = async (req, res) => {
             usuario_id,
             tipo_usuario: rolUsuario,
             datos_contacto,
-            categoria_id
+            categoria_id,
+            source_id,
+            service_type_id,
+            creado_por_id,
+            estado: (isAgentOrAdmin && estado) ? estado : 'abierto' // Agentes pueden definir estado, usuarios normales no
         });
 
-        // NOTIFICACIÓN POR CORREO (Usuario) - DESHABILITADO POR SOLICITUD
-        /*
-        const emailUsuario = req.user ? req.user.email : datos_contacto?.email;
-        if (emailUsuario) {
-            const subject = `Ticket Recibido: #${nuevoTicket.ticket_id}`;
-            const text = `Hola, hemos recibido tu solicitud: "${titulo}". ID: ${nuevoTicket.ticket_id}. Puedes consultar el estado en el portal.`;
-            sendEmail({ to: emailUsuario, subject, text }).catch(err => console.error('Error enviando email nuevo ticket:', err.message));
-        }
-        */
-
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
+        // No notificar al creador si es el mismo agente
         const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
         admins.forEach(admin => {
+            if (req.user && admin._id.toString() === req.user.id) return; // No auto-notificar
+
             notifyUser(
                 admin._id,
                 'NEW_TICKET',
@@ -99,10 +121,9 @@ exports.createTicket = async (req, res) => {
 
         // LOG ACTIVIDAD: Creación
         if (req.user) {
-            await logActivity(nuevoTicket._id, req.user.id, 'CREACION', { descripcion: 'Ticket creado' });
-        } else {
-            // Si es público, no tenemos ID de usuario real, pero podríamos manejarlo si tuviéramos un usuario "System" o similar. 
-            // Por ahora, solo logueamos si hay usuario autenticado o lo dejamos pendiente.
+            await logActivity(nuevoTicket._id, req.user.id, 'CREACION', {
+                descripcion: isAgentOrAdmin && !usuario_id ? 'Ticket Interno (Invitado) creado por agente' : 'Ticket creado'
+            });
         }
 
         res.status(201).json(nuevoTicket);

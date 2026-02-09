@@ -46,6 +46,21 @@ const ticketSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
     },
+    // Medio de Solicitud (Llamada, Presencial, etc.)
+    source_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TicketSource'
+    },
+    // Tipo de Servicio
+    service_type_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ServiceType'
+    },
+    // Usuario Agente/Admin que creó el ticket (si aplica)
+    creado_por_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     // Adjuntos (Imágenes/PDFs) subidos a Cloudinary/S3
     archivos: [{
         url: String,

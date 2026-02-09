@@ -54,4 +54,15 @@ const agentOrAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { protect, adminOnly, superAdminOnly, agentOrAdmin };
+const authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.rol)) {
+            return res.status(403).json({
+                message: `User role ${req.user ? req.user.rol : 'unknown'} is not authorized to access this route`
+            });
+        }
+        next();
+    };
+};
+
+module.exports = { protect, adminOnly, superAdminOnly, agentOrAdmin, authorize };

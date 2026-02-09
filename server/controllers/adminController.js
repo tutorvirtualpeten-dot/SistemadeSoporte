@@ -232,3 +232,27 @@ exports.getAgents = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+/**
+ * @desc    Buscar usuarios por nombre o email (para autocomplete)
+ * @route   GET /api/admin/users/search
+ * @access  Private (Agente/Admin/SuperAdmin)
+ */
+exports.searchUsers = async (req, res) => {
+    try {
+        const { query } = req.query;
+        if (!query) return res.json([]);
+
+        const users = await User.find({
+            $or: [
+                { nombre: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
+            ]
+        }).select('nombre email rol _id').limit(10);
+
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+

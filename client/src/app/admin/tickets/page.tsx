@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Trash2, Eye } from 'lucide-react';
+import { Trash2, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
 import SecurityModal from '@/components/SecurityModal';
 
@@ -72,7 +72,16 @@ export default function AdminTicketsPage() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Tickets</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Gestión de Tickets</h1>
+                <Link
+                    href="/admin/tickets/new"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium text-sm flex items-center"
+                >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nuevo Ticket Interno
+                </Link>
+            </div>
 
             <div className="bg-white shadow overflow-hidden rounded-lg">
                 <div className="overflow-x-auto">
