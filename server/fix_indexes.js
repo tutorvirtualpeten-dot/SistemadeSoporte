@@ -1,33 +1,37 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
+require('dotenv').config();
 
-// Cargar variables de entorno
-dotenv.config();
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://admin:admin123@cluster0.7s48o.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
 
 const fixIndexes = async () => {
     try {
-        console.log('Conectando a MongoDB para corregir índices...');
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('Conectado.');
+        await mongoose.connect(MONGO_URI);
+        console.log('Connected to MongoDB');
 
-        const Ticket = require('./models/Ticket');
+        const collection = mongoose.connection.collection('servicetypes');
+        const indexes = await collection.indexes();
+        console.log('Current Indexes:', indexes);
 
-        console.log('Intentando eliminar índice ticket_id_1 antiguo...');
-        try {
-            await mongoose.connection.collection('tickets').dropIndex('ticket_id_1');
-            console.log('✅ Índice eliminado con éxito. Se recreará automáticamente con la nueva configuración (sparse) al reiniciar el servidor.');
-        } catch (error) {
-            if (error.codeName === 'IndexNotFound') {
-                console.log('ℹ️ El índice no existía, no es necesario eliminarlo.');
-            } else {
-                console.log('⚠️ Aviso:', error.message);
-            }
+        // Find the index on 'nombre'
+        const nameIndex = indexes.find(idx => idx.key.nombre === 1 && idx.unique === true && !idx.key.descripcion);
+
+        if (nameIndex) {
+            console.log(`Found conflicting index: ${nameIndex.name}. Dropping it...`);
+            await collection.dropIndex(nameIndex.name);
+            console.log('Index dropped successfully.');
+        } else {
+            console.log('No conflicting index found on "nombre" alone.');
         }
 
-        process.exit();
+        console.log('Verifying indexes after operation...');
+        const newIndexes = await collection.indexes();
+        console.log('Updated Indexes:', newIndexes);
+
     } catch (error) {
-        console.error('❌ Error fatal:', error);
-        process.exit(1);
+        console.error('Error:', error);
+    } finally {
+        await mongoose.disconnect();
+        console.log('Disconnected');
     }
 };
 
