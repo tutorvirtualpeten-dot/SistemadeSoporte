@@ -41,8 +41,8 @@ export default function ServiceTypeManager() {
             const { data } = await api.post('/service-types', newType);
             setTypes([data, ...types]);
             setNewType({ nombre: '', descripcion: '' });
-        } catch (error) {
-            alert('Error al agregar tipo de servicio');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al agregar tipo de servicio');
         }
     };
 
@@ -52,8 +52,8 @@ export default function ServiceTypeManager() {
             const { data } = await api.put(`/service-types/${id}`, editType);
             setTypes(types.map(t => t._id === id ? data : t));
             setIsEditing(null);
-        } catch (error) {
-            alert('Error al actualizar tipo de servicio');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al actualizar tipo de servicio');
         }
     };
 
@@ -63,8 +63,8 @@ export default function ServiceTypeManager() {
             await api.delete(`/service-types/${deleteId}`);
             setTypes(types.filter(t => t._id !== deleteId));
             setDeleteId(null);
-        } catch (error) {
-            alert('Error al eliminar tipo de servicio');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al eliminar tipo de servicio');
         }
     };
 
@@ -72,8 +72,8 @@ export default function ServiceTypeManager() {
         try {
             const { data } = await api.put(`/service-types/${type._id}`, { activo: !type.activo });
             setTypes(types.map(t => t._id === type._id ? data : t));
-        } catch (error) {
-            alert('Error al cambiar estado');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al cambiar estado');
         }
     };
 

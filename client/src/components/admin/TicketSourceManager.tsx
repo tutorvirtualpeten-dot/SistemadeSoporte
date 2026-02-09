@@ -40,8 +40,8 @@ export default function TicketSourceManager() {
             const { data } = await api.post('/ticket-sources', { nombre: newSource });
             setSources([data, ...sources]);
             setNewSource('');
-        } catch (error) {
-            alert('Error al agregar fuente');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al agregar fuente');
         }
     };
 
@@ -52,8 +52,8 @@ export default function TicketSourceManager() {
             setSources(sources.map(s => s._id === id ? data : s));
             setIsEditing(null);
             setEditSource('');
-        } catch (error) {
-            alert('Error al actualizar fuente');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al actualizar fuente');
         }
     };
 
@@ -63,8 +63,8 @@ export default function TicketSourceManager() {
             await api.delete(`/ticket-sources/${deleteId}`);
             setSources(sources.filter(s => s._id !== deleteId));
             setDeleteId(null);
-        } catch (error) {
-            alert('Error al eliminar fuente');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al eliminar fuente');
         }
     };
 
@@ -72,8 +72,8 @@ export default function TicketSourceManager() {
         try {
             const { data } = await api.put(`/ticket-sources/${source._id}`, { activo: !source.activo });
             setSources(sources.map(s => s._id === source._id ? data : s));
-        } catch (error) {
-            alert('Error al cambiar estado');
+        } catch (error: any) {
+            alert(error.response?.data?.message || 'Error al cambiar estado');
         }
     };
 
