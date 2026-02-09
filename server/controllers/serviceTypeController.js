@@ -21,6 +21,9 @@ exports.createServiceType = async (req, res) => {
         const type = await ServiceType.create({ nombre, descripcion, activo });
         res.status(201).json(type);
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Este tipo de servicio ya existe (nombre y descripción duplicados)' });
+        }
         res.status(400).json({ message: error.message });
     }
 };

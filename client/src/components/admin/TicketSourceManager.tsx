@@ -91,7 +91,7 @@ export default function TicketSourceManager() {
                 />
                 <button
                     onClick={handleAdd}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center whitespace-nowrap flex-shrink-0"
                 >
                     <Plus className="h-4 w-4 mr-1" />
                     Agregar
@@ -129,7 +129,7 @@ export default function TicketSourceManager() {
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => handleToggleActive(source)}
-                                        className="text-gray-500 hover:text-blue-600 text-xs mr-2"
+                                        className="text-gray-500 hover:text-blue-600 text-xs mr-2 whitespace-nowrap"
                                     >
                                         {source.activo ? 'Desactivar' : 'Activar'}
                                     </button>

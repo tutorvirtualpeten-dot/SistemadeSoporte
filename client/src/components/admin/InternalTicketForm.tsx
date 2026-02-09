@@ -18,6 +18,7 @@ interface TicketSource {
 interface ServiceType {
     _id: string;
     nombre: string;
+    descripcion?: string;
 }
 
 interface User {
@@ -321,7 +322,7 @@ export default function InternalTicketForm() {
                         >
                             <option value="">Seleccionar Tipo Servicio</option>
                             {serviceTypes.map(s => (
-                                <option key={s._id} value={s._id}>{s.nombre}</option>
+                                <option key={s._id} value={s._id}>{s.nombre}{s.descripcion ? ` - ${s.descripcion}` : ''}</option>
                             ))}
                         </select>
                     </div>

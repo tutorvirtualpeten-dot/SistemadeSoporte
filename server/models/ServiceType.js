@@ -5,7 +5,6 @@ const serviceTypeSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        unique: true
     },
     descripcion: {
         type: String,
@@ -22,3 +21,5 @@ const serviceTypeSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('ServiceType', serviceTypeSchema);
+
+serviceTypeSchema.index({ nombre: 1, descripcion: 1 }, { unique: true });
