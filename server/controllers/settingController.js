@@ -12,6 +12,21 @@ exports.getSettings = async (req, res) => {
             settings = await Setting.create({});
         }
 
+        // Lazy migration: Inicializar modulos si no existen
+        if (!settings.modulos) {
+            settings.modulos = {
+                tickets: ['admin', 'agente'],
+                users: [],
+                categories: ['admin'],
+                faqs: ['admin'],
+                responses: ['admin', 'agente'],
+                catalogs: ['admin', 'agente'],
+                audit: [],
+                settings: ['admin']
+            };
+            await settings.save();
+        }
+
         const publicSettings = {
             nombre_app: settings.nombre_app,
             logo_url: settings.logo_url
