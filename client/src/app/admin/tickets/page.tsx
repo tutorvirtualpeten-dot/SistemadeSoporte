@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import api from '@/lib/api';
 import { Trash2, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ interface Ticket {
     prioridad: string;
     calificacion?: number;
     usuario_id: { nombre: string };
+    agente_id?: { _id: string; nombre: string }; // Added field
     datos_contacto?: { nombre_completo: string, email: string };
     fecha_creacion: string;
 }
@@ -28,6 +29,7 @@ export default function AdminTicketsPage() {
     const [showPendingOnly, setShowPendingOnly] = useState(true);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [selectedAgent, setSelectedAgent] = useState(''); // Agent Filter
 
     const fetchTickets = async () => {
         try {
@@ -44,10 +46,28 @@ export default function AdminTicketsPage() {
         fetchTickets();
     }, []);
 
+    // Extract unique agents from tickets
+    const agents = useMemo(() => {
+        const uniqueAgents = new Map();
+        tickets.forEach(ticket => {
+            if (ticket.agente_id) {
+                uniqueAgents.set(ticket.agente_id._id, ticket.agente_id.nombre);
+            }
+        });
+        return Array.from(uniqueAgents.entries()).map(([id, nombre]) => ({ id, nombre }));
+    }, [tickets]);
+
     const filteredTickets = tickets.filter(ticket => {
         // Status Filter
         if (showPendingOnly) {
             if (ticket.estado === 'resuelto' || ticket.estado === 'cerrado') {
+                return false;
+            }
+        }
+
+        // Agent Filter
+        if (selectedAgent) {
+            if (ticket.agente_id?._id !== selectedAgent) {
                 return false;
             }
         }
@@ -77,6 +97,7 @@ export default function AdminTicketsPage() {
             Estado: t.estado,
             Prioridad: t.prioridad,
             Solicitante: t.datos_contacto?.nombre_completo || t.usuario_id?.nombre || 'Anónimo',
+            Agente: t.agente_id?.nombre || 'Sin Asignar',
             Email: t.datos_contacto?.email || '',
             Fecha: new Date(t.fecha_creacion).toLocaleDateString()
         })));
@@ -92,13 +113,14 @@ export default function AdminTicketsPage() {
         const doc = new jsPDF();
 
         autoTable(doc, {
-            head: [['ID', 'Asunto', 'Estado', 'Prioridad', 'Solicitante', 'Fecha']],
+            head: [['ID', 'Asunto', 'Estado', 'Prioridad', 'Solicitante', 'Agente', 'Fecha']],
             body: filteredTickets.map(t => [
                 t.ticket_id,
                 t.titulo,
                 t.estado,
                 t.prioridad,
                 t.datos_contacto?.nombre_completo || t.usuario_id?.nombre || 'Anónimo',
+                t.agente_id?.nombre || 'Sin Asignar',
                 new Date(t.fecha_creacion).toLocaleDateString()
             ]),
         });
@@ -164,6 +186,22 @@ export default function AdminTicketsPage() {
 
                 <div className="h-8 w-px bg-gray-300 mx-2 hidden md:block"></div>
 
+                {/* Agent Selector */}
+                <select
+                    value={selectedAgent}
+                    onChange={(e) => setSelectedAgent(e.target.value)}
+                    className="block pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                >
+                    <option value="">Todos los Agentes</option>
+                    {agents.map(agent => (
+                        <option key={agent.id} value={agent.id}>
+                            {agent.nombre}
+                        </option>
+                    ))}
+                </select>
+
+                <div className="h-8 w-px bg-gray-300 mx-2 hidden md:block"></div>
+
                 <div className="flex items-center space-x-2">
                     <div className="relative">
                         <input
@@ -189,6 +227,7 @@ export default function AdminTicketsPage() {
                             setShowPendingOnly(false); // Uncheck "Solo Pendientes" as shown in image
                             setStartDate('');
                             setEndDate('');
+                            setSelectedAgent(''); // Reset Agent
                         }}
                         className="p-2 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                         title="Limpiar filtros"
