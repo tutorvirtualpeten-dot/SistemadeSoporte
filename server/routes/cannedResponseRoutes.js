@@ -14,10 +14,9 @@ router.use(protect);
 // Admin y Agentes pueden ver
 router.get('/', agentOrAdmin, getCannedResponses);
 
-// Solo Admin puede crear, actualizar y borrar (por ahora)
-// Podríamos dejar que agentes creen las suyas propias, pero empezamos simple.
-router.post('/', adminOnly, createCannedResponse);
-router.put('/:id', adminOnly, updateCannedResponse);
-router.delete('/:id', adminOnly, deleteCannedResponse);
+// Ahora Agentes también pueden crear/editar/borrar (el controlador valida propiedad)
+router.post('/', agentOrAdmin, createCannedResponse);
+router.put('/:id', agentOrAdmin, updateCannedResponse);
+router.delete('/:id', agentOrAdmin, deleteCannedResponse);
 
 module.exports = router;

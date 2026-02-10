@@ -14,7 +14,7 @@ exports.getCannedResponses = async (req, res) => {
 
 // @desc    Crear respuesta rápida
 // @route   POST /api/canned-responses
-// @access  Private (Admin)
+// @access  Private (Admin/Agente)
 exports.createCannedResponse = async (req, res) => {
     try {
         const { titulo, contenido, atajo } = req.body;
@@ -37,13 +37,21 @@ exports.createCannedResponse = async (req, res) => {
 
 // @desc    Eliminar respuesta rápida
 // @route   DELETE /api/canned-responses/:id
-// @access  Private (Admin)
+// @access  Private (Admin/Agente Creador)
 exports.deleteCannedResponse = async (req, res) => {
     try {
         const response = await CannedResponse.findById(req.params.id);
 
         if (!response) {
             return res.status(404).json({ message: 'Respuesta no encontrada' });
+        }
+
+        // Verificar permisos: Admin o Creador
+        const isAdmin = req.user.rol === 'admin' || req.user.rol === 'super_admin';
+        const isCreator = response.creado_por && response.creado_por.toString() === req.user.id;
+
+        if (!isAdmin && !isCreator) {
+            return res.status(403).json({ message: 'No tienes permiso para eliminar esta respuesta' });
         }
 
         await response.deleteOne();
@@ -55,19 +63,28 @@ exports.deleteCannedResponse = async (req, res) => {
 
 // @desc    Actualizar respuesta rápida
 // @route   PUT /api/canned-responses/:id
-// @access  Private (Admin)
+// @access  Private (Admin/Agente Creador)
 exports.updateCannedResponse = async (req, res) => {
     try {
         const { titulo, contenido, atajo } = req.body;
-        const response = await CannedResponse.findByIdAndUpdate(
-            req.params.id,
-            { titulo, contenido, atajo },
-            { new: true, runValidators: true }
-        );
 
+        const response = await CannedResponse.findById(req.params.id);
         if (!response) {
             return res.status(404).json({ message: 'Respuesta no encontrada' });
         }
+
+        // Verificar permisos: Admin o Creador
+        const isAdmin = req.user.rol === 'admin' || req.user.rol === 'super_admin';
+        const isCreator = response.creado_por && response.creado_por.toString() === req.user.id;
+
+        if (!isAdmin && !isCreator) {
+            return res.status(403).json({ message: 'No tienes permiso para editar esta respuesta' });
+        }
+
+        response.titulo = titulo;
+        response.contenido = contenido;
+        response.atajo = atajo;
+        await response.save();
 
         res.json(response);
     } catch (error) {

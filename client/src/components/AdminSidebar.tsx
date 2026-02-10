@@ -26,7 +26,7 @@ export default function AdminSidebar() {
         { name: 'Usuarios', href: '/admin/users', icon: Users, roles: ['super_admin'] },
         { name: 'Categorías', href: '/admin/categories', icon: Files, roles: ['admin', 'super_admin'] },
         { name: 'FAQs', href: '/admin/faqs', icon: HelpCircle, roles: ['admin', 'super_admin'] },
-        { name: 'Respuestas', href: '/admin/responses', icon: Files, roles: ['admin', 'super_admin'] },
+        { name: 'Respuestas', href: '/admin/responses', icon: Files, roles: ['admin', 'super_admin', 'agente'] },
         { name: 'Catálogos', href: '/admin/settings/catalogs', icon: Files, roles: ['admin', 'super_admin', 'agente'] },
         { name: 'Auditoría', href: '/admin/audit', icon: ShieldCheck, roles: ['super_admin'] },
         { name: 'Configuración', href: '/admin/settings', icon: Settings, roles: ['admin', 'super_admin'] },
