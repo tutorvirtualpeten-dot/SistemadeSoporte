@@ -31,9 +31,13 @@ export default function AdminTicketsPage() {
     const [endDate, setEndDate] = useState('');
     const [selectedAgent, setSelectedAgent] = useState(''); // Agent Filter
 
+    // Sorting
+    const [sortField, setSortField] = useState('fecha_creacion');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
     const fetchTickets = async () => {
         try {
-            const { data } = await api.get('/tickets'); // Admin endpoint returns all
+            const { data } = await api.get(`/tickets?sortBy=${sortField}&order=${sortOrder}`);
             setTickets(data);
         } catch (error) {
             console.error(error);
@@ -44,7 +48,7 @@ export default function AdminTicketsPage() {
 
     useEffect(() => {
         fetchTickets();
-    }, []);
+    }, [sortField, sortOrder]); // Re-fetch when sort changes
 
     // Extract unique agents from tickets
     const agents = useMemo(() => {
@@ -88,6 +92,20 @@ export default function AdminTicketsPage() {
 
         return true;
     });
+
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortOrder('desc'); // Default to descending for new field
+        }
+    };
+
+    const getSortIcon = (field: string) => {
+        if (sortField !== field) return <span className="ml-1 text-gray-400">↕</span>;
+        return sortOrder === 'asc' ? <span className="ml-1 text-blue-600">↑</span> : <span className="ml-1 text-blue-600">↓</span>;
+    };
 
     const exportToExcel = async () => {
         const xlsx = await import('xlsx');
@@ -270,12 +288,27 @@ export default function AdminTicketsPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"># ID</th>
+                                <th
+                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('ticket_id')}
+                                >
+                                    # ID {getSortIcon('ticket_id')}
+                                </th>
                                 <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asunto</th>
                                 <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                <th
+                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('estado')}
+                                >
+                                    Estado {getSortIcon('estado')}
+                                </th>
                                 <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                <th
+                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('fecha_creacion')}
+                                >
+                                    Fecha {getSortIcon('fecha_creacion')}
+                                </th>
                                 <th className="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>

@@ -23,10 +23,18 @@ export default function PortalDashboard() {
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [sort, setSort] = useState('fecha_creacion_desc');
+
     useEffect(() => {
         const fetchTickets = async () => {
             try {
-                const { data } = await api.get('/tickets');
+                const [sortBy, order] = sort === 'fecha_creacion_desc' ? ['fecha_creacion', 'desc'] :
+                    sort === 'fecha_creacion_asc' ? ['fecha_creacion', 'asc'] :
+                        sort === 'ticket_id_desc' ? ['ticket_id', 'desc'] :
+                            sort === 'ticket_id_asc' ? ['ticket_id', 'asc'] :
+                                sort === 'estado' ? ['estado', 'asc'] : ['fecha_creacion', 'desc'];
+
+                const { data } = await api.get(`/tickets?sortBy=${sortBy}&order=${order}`);
                 setTickets(data);
             } catch (error) {
                 console.error(error);
@@ -35,7 +43,7 @@ export default function PortalDashboard() {
             }
         };
         fetchTickets();
-    }, []);
+    }, [sort]);
 
     if (loading) return <div>Cargando tickets...</div>;
 
@@ -52,7 +60,18 @@ export default function PortalDashboard() {
                     </h2>
                 </div>
                 {!['admin', 'super_admin'].includes(user?.rol || '') && (
-                    <div className="mt-4 flex md:mt-0 md:ml-4">
+                    <div className="mt-4 flex md:mt-0 md:ml-4 items-center space-x-3">
+                        <select
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value)}
+                            className="block pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                        >
+                            <option value="fecha_creacion_desc">Más recientes</option>
+                            <option value="fecha_creacion_asc">Más antiguos</option>
+                            <option value="ticket_id_desc">ID (Desc)</option>
+                            <option value="ticket_id_asc">ID (Asc)</option>
+                            <option value="estado">Estado</option>
+                        </select>
                         <Link href="/portal/create">
                             <Button>
                                 <Plus className="h-4 w-4 mr-2" />

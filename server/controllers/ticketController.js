@@ -145,18 +145,25 @@ exports.getTickets = async (req, res) => {
     try {
         let tickets;
 
+        // Obtener parámetros de ordenamiento
+        const sortBy = req.query.sortBy || 'fecha_creacion';
+        const order = req.query.order === 'asc' ? 1 : -1;
+
+        const sortOptions = {};
+        sortOptions[sortBy] = order;
+
         // Si es admin, super_admin o agente, ve todos
         if (req.user.rol === 'admin' || req.user.rol === 'super_admin' || req.user.rol === 'agente') {
             tickets = await Ticket.find()
                 .populate('usuario_id', 'nombre email')
                 .populate('agente_id', 'nombre email')
                 .populate('categoria_id', 'nombre')
-                .sort({ fecha_creacion: -1 });
+                .sort(sortOptions);
         } else {
             // Si es usuario, solo ve los suyos
             tickets = await Ticket.find({ usuario_id: req.user.id })
                 .populate('categoria_id', 'nombre')
-                .sort({ fecha_creacion: -1 });
+                .sort(sortOptions);
         }
 
         res.json(tickets);
