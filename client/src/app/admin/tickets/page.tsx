@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { Trash2, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
 import SecurityModal from '@/components/SecurityModal';
+import { useAuth } from '@/context/AuthContext';
 
 interface Ticket {
     _id: string;
@@ -24,6 +25,7 @@ export default function AdminTicketsPage() {
     const [loading, setLoading] = useState(true);
     const [ticketToDelete, setTicketToDelete] = useState<string | null>(null);
     const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+    const { user } = useAuth();
 
     // Filters
     const [showPendingOnly, setShowPendingOnly] = useState(true);
@@ -160,6 +162,18 @@ export default function AdminTicketsPage() {
             setTicketToDelete(null);
         } catch (error) {
             alert('Error eliminando ticket');
+        }
+    };
+
+    const handleTakeTicket = async (ticketId: string) => {
+        if (!user) return;
+        try {
+            await api.put(`/tickets/${ticketId}`, { agente_id: user._id });
+            // Refresh tickets to show updated agent
+            fetchTickets();
+        } catch (error) {
+            console.error('Error taking ticket:', error);
+            alert('Error al tomar el ticket');
         }
     };
 
@@ -302,6 +316,7 @@ export default function AdminTicketsPage() {
                                 >
                                     Estado {getSortIcon('estado')}
                                 </th>
+                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agente</th>
                                 <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
                                 <th
                                     className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -328,6 +343,18 @@ export default function AdminTicketsPage() {
                                     </td>
                                     <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                                         {getStatusBadge(ticket.estado)}
+                                    </td>
+                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        {ticket.agente_id ? (
+                                            <span className="text-gray-900">{ticket.agente_id.nombre}</span>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleTakeTicket(ticket._id)}
+                                                className="text-blue-600 hover:text-blue-900 font-semibold text-xs border border-blue-600 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
+                                            >
+                                                Tomar Ticket
+                                            </button>
+                                        )}
                                     </td>
                                     <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                                         {ticket.calificacion ? (
