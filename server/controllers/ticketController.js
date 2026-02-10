@@ -152,9 +152,25 @@ exports.getTickets = async (req, res) => {
         const sortOptions = {};
         sortOptions[sortBy] = order;
 
-        // Si es admin, super_admin o agente, ve todos
-        if (req.user.rol === 'admin' || req.user.rol === 'super_admin' || req.user.rol === 'agente') {
+        // Si es admin o super_admin, ve todos
+        if (req.user.rol === 'admin' || req.user.rol === 'super_admin') {
             tickets = await Ticket.find()
+                .populate('usuario_id', 'nombre email')
+                .populate('agente_id', 'nombre email')
+                .populate('categoria_id', 'nombre')
+                .sort(sortOptions);
+        } else if (req.user.rol === 'agente') {
+            // Si es agente, ve:
+            // 1. Asignados a él
+            // 2. Creados por él
+            // 3. Sin asignar (para tomarlo)
+            tickets = await Ticket.find({
+                $or: [
+                    { agente_id: req.user.id },
+                    { creado_por_id: req.user.id },
+                    { agente_id: null }
+                ]
+            })
                 .populate('usuario_id', 'nombre email')
                 .populate('agente_id', 'nombre email')
                 .populate('categoria_id', 'nombre')
