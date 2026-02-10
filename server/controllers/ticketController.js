@@ -256,6 +256,15 @@ exports.updateTicket = async (req, res) => {
         const isOwner = ticket.usuario_id && ticket.usuario_id.toString() === req.user.id;
         const isAdminOrAgent = req.user.rol === 'admin' || req.user.rol === 'super_admin' || req.user.rol === 'agente';
 
+        console.log('UpdateTicket Debug:', {
+            userId: req.user.id,
+            userRol: req.user.rol,
+            ticketId: ticket._id,
+            isOwner,
+            isAdminOrAgent,
+            body: req.body
+        });
+
         if (!isOwner && !isAdminOrAgent) {
             return res.status(401).json({ message: 'No autorizado' });
         }
