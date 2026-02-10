@@ -8,7 +8,7 @@ const ticketSchema = new mongoose.Schema({
     },
     descripcion: {
         type: String,
-        required: true
+        // required: true // Opcional para agentes
     },
     estado: {
         type: String,
@@ -45,6 +45,7 @@ const ticketSchema = new mongoose.Schema({
     categoria_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
+        // required removed
     },
     // Medio de Solicitud (Llamada, Presencial, etc.)
     source_id: {

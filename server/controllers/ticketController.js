@@ -189,7 +189,7 @@ exports.getTicketById = async (req, res) => {
             .populate('categoria_id', 'nombre');
 
         if (!ticket) {
-            return res.status(404).json({ message: 'Ticket no encontrado' });
+            return res.status(404).json({ message: 'El ticket solicitado no existe o ha sido eliminado.' });
         }
 
         // Verificar permisos: dueño, admin o agente
@@ -233,7 +233,7 @@ exports.updateTicket = async (req, res) => {
         const ticket = await Ticket.findById(req.params.id);
 
         if (!ticket) {
-            return res.status(404).json({ message: 'Ticket no encontrado' });
+            return res.status(404).json({ message: 'No se pudo encontrar el ticket solicitado. Por favor, verifique el número de ticket e intente nuevamente.' });
         }
 
         // Verificar permisos
@@ -355,7 +355,7 @@ exports.getTicketStatus = async (req, res) => {
             .populate('agente_id', 'nombre');
 
         if (!ticket) {
-            return res.status(404).json({ message: 'Ticket no encontrado' });
+            return res.status(404).json({ message: 'No se encontró información pública para este número de ticket.' });
         }
 
         if (ticket.estado === 'cerrado') {
@@ -384,7 +384,7 @@ exports.addPublicComment = async (req, res) => {
         const ticketId = parseInt(req.params.id);
 
         const ticket = await Ticket.findOne({ ticket_id: ticketId });
-        if (!ticket) return res.status(404).json({ message: 'Ticket no encontrado' });
+        if (!ticket) return res.status(404).json({ message: 'No se puede comentar porque el ticket no existe.' });
 
         if (ticket.estado === 'cerrado') {
             return res.status(400).json({ message: 'No se puede comentar en un ticket cerrado.' });
@@ -417,7 +417,7 @@ exports.rateTicket = async (req, res) => {
         const ticketId = parseInt(req.params.id);
 
         const ticket = await Ticket.findOne({ ticket_id: ticketId });
-        if (!ticket) return res.status(404).json({ message: 'Ticket no encontrado' });
+        if (!ticket) return res.status(404).json({ message: 'No se puede calificar un ticket que no existe.' });
 
         if (ticket.estado !== 'resuelto') {
             return res.status(400).json({ message: 'Solo se pueden calificar tickets resueltos.' });
@@ -439,7 +439,7 @@ exports.deleteTicket = async (req, res) => {
         const ticket = await Ticket.findById(req.params.id);
 
         if (!ticket) {
-            return res.status(404).json({ message: 'Ticket no encontrado' });
+            return res.status(404).json({ message: 'No se puede eliminar el ticket porque no existe.' });
         }
 
         // Solo admin borra

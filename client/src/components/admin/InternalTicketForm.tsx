@@ -290,7 +290,7 @@ export default function InternalTicketForm() {
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700">Descripción Detallada</label>
                         <textarea
-                            required
+                            // required removed
                             rows={4}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border"
                             value={formData.descripcion}
@@ -301,7 +301,7 @@ export default function InternalTicketForm() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Categoría</label>
                         <select
-                            required
+                            // required removed
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border"
                             value={formData.categoria_id}
                             onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
