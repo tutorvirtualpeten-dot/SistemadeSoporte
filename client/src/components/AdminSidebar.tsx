@@ -85,16 +85,23 @@ export default function AdminSidebar() {
                                 '/admin/responses': 'responses',
                                 '/admin/settings/catalogs': 'catalogs',
                                 '/admin/settings': 'settings',
-                                // 'dashboard' y 'users' (super_admin) suelen quedar fijos o se agregan aquí si se desea dinámico
                             };
 
                             const moduleKey = moduleMap[item.href];
 
-                            // Si el módulo está configurado en settings.modulos
-                            if (moduleKey && settings.modulos && settings.modulos[moduleKey]) {
-                                // Si NO eres super_admin Y tu rol NO está en la lista permitida -> Ocultar
-                                if (user.rol !== 'super_admin' && !settings.modulos[moduleKey].includes(user.rol)) {
+                            // Si el módulo requiere configuración (está en el mapa)
+                            if (moduleKey) {
+                                // Si no se han cargado los módulos, ocultar por seguridad (excepto si es super_admin, que podría pasar, pero mejor esperar)
+                                if (!settings.modulos) {
                                     return null;
+                                }
+
+                                // Si existe configuración para este módulo
+                                if (settings.modulos[moduleKey]) {
+                                    // Verificar roles permitidos
+                                    if (user?.rol !== 'super_admin' && !settings.modulos[moduleKey].includes(user?.rol)) {
+                                        return null;
+                                    }
                                 }
                             }
 
