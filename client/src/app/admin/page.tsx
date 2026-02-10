@@ -9,7 +9,8 @@ import {
     AlertCircle,
     Download,
     Calendar,
-    Filter
+    Filter,
+    X
 } from 'lucide-react';
 import {
     BarChart,
@@ -61,12 +62,22 @@ export default function AdminDashboardPage() {
     const [agents, setAgents] = useState<{ _id: string; nombre: string }[]>([]);
     const [selectedAgent, setSelectedAgent] = useState('');
 
-    const fetchStats = async () => {
+    const fetchStats = async (
+        overrideDates?: typeof dateRange,
+        overrideStatus?: string[],
+        overrideAgent?: string
+    ) => {
         setLoading(true);
         try {
-            const statusQuery = statusFilter.join(',');
-            let query = `/admin/stats?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}&status=${statusQuery}`;
-            if (selectedAgent) query += `&agentId=${selectedAgent}`;
+            // Use overrides or current state
+            const currentDates = overrideDates || dateRange;
+            const currentStatus = overrideStatus || statusFilter;
+            // Handle empty string correctly for agent (can be empty string which is falsy)
+            const currentAgent = overrideAgent !== undefined ? overrideAgent : selectedAgent;
+
+            const statusQuery = currentStatus.join(',');
+            let query = `/admin/stats?startDate=${currentDates.startDate}&endDate=${currentDates.endDate}&status=${statusQuery}`;
+            if (currentAgent) query += `&agentId=${currentAgent}`;
 
             const res = await api.get(query);
             setData(res.data);
@@ -89,7 +100,7 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         fetchStats();
         fetchAgents();
-    }, [statusFilter, selectedAgent]);
+    }, [statusFilter, selectedAgent]); // Keeps auto-fetching on these changes
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
@@ -97,6 +108,19 @@ export default function AdminDashboardPage() {
 
     const applyFilter = () => {
         fetchStats();
+    };
+
+    const clearFilters = () => {
+        const resetDates = { startDate: '', endDate: '' };
+        const resetStatus = ['abierto', 'en_progreso', 'resuelto', 'cerrado'];
+        const resetAgent = '';
+
+        setDateRange(resetDates);
+        setStatusFilter(resetStatus);
+        setSelectedAgent(resetAgent);
+
+        // Fetch immediately with reset values to avoid waiting for state update or useEffect
+        fetchStats(resetDates, resetStatus, resetAgent);
     };
 
     const exportToExcel = () => {
@@ -229,6 +253,13 @@ export default function AdminDashboardPage() {
                             className="border-none focus:ring-0 text-gray-600 p-0 text-sm"
                         />
                     </div>
+                    <button
+                        onClick={clearFilters}
+                        className="p-1.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+                        title="Limpiar filtros"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
                     <button
                         onClick={applyFilter}
                         className="bg-blue-600 hover:bg-blue-700 text-white p-1.5 rounded-md transition-colors"
