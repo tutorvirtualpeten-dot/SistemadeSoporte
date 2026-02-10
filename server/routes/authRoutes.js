@@ -6,6 +6,7 @@ const { protect } = require('../middleware/authMiddleware');
 // router.post('/register', register); // Registro deshabilitado por seguridad
 router.post('/login', login);
 router.post('/verify-password', protect, verifyPassword);
+router.put('/update-password', protect, updatePassword);
 router.get('/me', protect, getMe);
 
 module.exports = router;

@@ -8,12 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { Button } from './ui/Button';
 import LogoImage from './LogoImage';
+import ProfileModal from './admin/ProfileModal';
 
 export default function AdminSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const { settings, loading } = useSettings(); // Use settings context
     const [isOpen, setIsOpen] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -92,9 +94,13 @@ export default function AdminSidebar() {
                     </nav>
 
                     <div className="p-4 bg-slate-800">
-                        <div className="mb-4 px-2">
+                        <div
+                            className="mb-4 px-2 cursor-pointer hover:bg-slate-700 rounded p-2 transition-colors"
+                            onClick={() => setIsProfileModalOpen(true)}
+                        >
                             <p className="text-sm font-semibold text-white">{user?.nombre}</p>
                             <p className="text-xs text-slate-400 capitalize">{user?.rol?.replace('_', ' ')}</p>
+                            <p className="text-xs text-blue-300 mt-1">Ver Perfil</p>
                         </div>
                         <Button
                             variant="secondary"
@@ -114,6 +120,9 @@ export default function AdminSidebar() {
                     onClick={toggleSidebar}
                 ></div>
             )}
+
+            {/* Profile Modal */}
+            <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
         </>
     );
 }

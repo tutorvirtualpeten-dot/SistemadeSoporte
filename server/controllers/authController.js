@@ -147,3 +147,44 @@ exports.getMe = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+/**
+ * @desc    Actualizar contraseña del usuario autenticado
+ * @route   PUT /api/auth/update-password
+ * @access  Private
+ * @param   {string} currentPassword - Contraseña actual
+ * @param   {string} newPassword - Nueva contraseña
+ */
+// @desc    Actualizar contraseña
+// @route   PUT /api/auth/update-password
+// @access  Private
+exports.updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        // Obtener usuario con contraseña
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Verificar contraseña actual
+        if (!(await bcrypt.compare(currentPassword, user.password))) {
+            return res.status(401).json({ message: 'La contraseña actual es incorrecta' });
+        }
+
+        // Hash nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save();
+
+        // LOG SYSTEM: Cambio de contraseña
+        await logSystem(user._id, 'UPDATE_PASSWORD', { message: 'Usuario actualizó su contraseña' }, req);
+
+        res.json({ message: 'Contraseña actualizada correctamente' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
