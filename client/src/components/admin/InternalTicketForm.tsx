@@ -148,7 +148,7 @@ export default function InternalTicketForm() {
             <div className="border-b pb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <UserIcon className="h-5 w-5 text-blue-600" />
-                    Datos del Solicitante
+                    Datos del Solicitante <span className="text-red-500">*</span>
                 </h3>
 
                 <div className="flex gap-4 mb-4">
@@ -221,7 +221,7 @@ export default function InternalTicketForm() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                            <label className="block text-sm font-medium text-gray-700">Nombre Completo <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 required={mode === 'guest'}
@@ -258,7 +258,7 @@ export default function InternalTicketForm() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Tipo de Usuario</label>
+                            <label className="block text-sm font-medium text-gray-700">Tipo de Usuario <span className="text-red-500">*</span></label>
                             <select
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black px-3 py-2 border"
                                 value={formData.tipo_usuario}
@@ -277,7 +277,7 @@ export default function InternalTicketForm() {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Detalles de la Solicitud</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Título / Asunto</label>
+                        <label className="block text-sm font-medium text-gray-700">Título / Asunto <span className="text-red-500">*</span></label>
                         <input
                             type="text"
                             required
