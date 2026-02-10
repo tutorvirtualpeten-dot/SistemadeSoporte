@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getMe, verifyPassword } = require('../controllers/authController');
+const { register, login, getMe, verifyPassword, updatePassword } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 // router.post('/register', register); // Registro deshabilitado por seguridad
