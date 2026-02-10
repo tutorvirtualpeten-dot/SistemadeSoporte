@@ -272,11 +272,17 @@ exports.updateTicket = async (req, res) => {
         let updateData = req.body;
 
         // Si es dueño pero NO admin/agente, restringir campos
+        // Si es dueño pero NO admin/agente, restringir campos
         if (isOwner && !isAdminOrAgent) {
             const { titulo, descripcion, datos_contacto, archivo_adjunto, categoria_id } = req.body;
             updateData = { titulo, descripcion, datos_contacto, archivo_adjunto, categoria_id };
             // Forzar actualización de fecha
             updateData.fecha_actualizacion = Date.now();
+        } else {
+            // Si es Admin/Agente, permitir todo, pero tratar agente_id específicamente si viene
+            if (req.body.hasOwnProperty('agente_id')) {
+                updateData.agente_id = req.body.agente_id || null; // Convertir "" a null
+            }
         }
 
         const actualizado = await Ticket.findByIdAndUpdate(
@@ -314,8 +320,30 @@ exports.updateTicket = async (req, res) => {
 
         // 2. Asignación de Agente -> Notificar al Agente
         // Detectar si cambió el agente (comparando IDs)
-        const oldAgentId = ticket.agente_id ? ticket.agente_id.toString() : null;
-        const newAgentId = actualizado.agente_id ? actualizado.agente_id._id.toString() : null;
+        // Detectar si cambió el agente
+        let oldAgentId = ticket.agente_id ? ticket.agente_id.toString() : null;
+        let newAgentId = undefined;
+
+        if (req.body.hasOwnProperty('agente_id')) {
+            // Permitir desasignar (null o string vacío)
+            newAgentId = req.body.agente_id ? req.body.agente_id : null;
+            updateData.agente_id = newAgentId;
+        }
+
+        // Si es agente, SOLO puede asignarse/desasignarse a SÍ MISMO o tomar tickets libres
+        // Sin embargo, la regla general 'isAdminOrAgent' ya pasó arriba.
+        // Aquí podríamos refinar para que no asignen a OTROS agentes, pero por ahora lo dejamos flexible o lo restringimos si se pide.
+
+        // ... Log y Notificaciones ...
+
+        const actualizado = await Ticket.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true }
+        ).populate('usuario_id', 'email nombre').populate('agente_id', 'email nombre');
+
+        // Re-evaluar IDs tras update para notificación
+        newAgentId = actualizado.agente_id ? actualizado.agente_id._id.toString() : null;
 
         if (newAgentId && newAgentId !== oldAgentId) {
             // LOG ACTIVIDAD: Asignación
