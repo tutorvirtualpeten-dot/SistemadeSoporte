@@ -65,4 +65,23 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { protect, adminOnly, superAdminOnly, agentOrAdmin, authorize };
+const optionalAuth = async (req, res, next) => {
+    let token;
+
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+    ) {
+        try {
+            token = req.headers.authorization.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secreto_super_seguro');
+            req.user = await User.findById(decoded.id).select('-password');
+        } catch (error) {
+            console.error('Optional Auth Error (Ignored):', error.message);
+            // No hacemos nada, simplemente no hay usuario
+        }
+    }
+    next();
+};
+
+module.exports = { protect, adminOnly, superAdminOnly, agentOrAdmin, authorize, optionalAuth };
