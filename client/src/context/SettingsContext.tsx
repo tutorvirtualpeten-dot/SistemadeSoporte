@@ -7,6 +7,7 @@ interface Settings {
     nombre_app?: string;
     logo_url?: string;
     smtp_config?: any;
+    modulos?: { [key: string]: string[] };
 }
 
 interface SettingsContextType {

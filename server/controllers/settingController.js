@@ -4,7 +4,7 @@ const logSystem = require('../utils/systemLogger');
 
 // @desc    Obtener configuración
 // @route   GET /api/settings
-// @access  Public
+// @access  Public (Partial) / Private (Full)
 exports.getSettings = async (req, res) => {
     try {
         let settings = await Setting.findOne();
@@ -12,12 +12,22 @@ exports.getSettings = async (req, res) => {
             settings = await Setting.create({});
         }
 
-        // Retornar solo datos públicos
-        res.json({
+        const publicSettings = {
             nombre_app: settings.nombre_app,
             logo_url: settings.logo_url
-            // No retornar smtp_config por seguridad
-        });
+        };
+
+        // Si hay usuario y es staff, retornar configuración completa (menos passwords si se requiere)
+        if (req.user && ['admin', 'super_admin', 'agente'].includes(req.user.rol)) {
+            return res.json({
+                ...publicSettings,
+                smtp_config: settings.smtp_config, // Cuidado: No exponer pass en producción idealmente
+                modulos: settings.modulos
+            });
+        }
+
+        // Retornar solo datos públicos para login/visitantes
+        res.json(publicSettings);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

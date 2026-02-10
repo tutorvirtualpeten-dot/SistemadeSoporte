@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import LogoImage from '@/components/LogoImage';
 import SecurityModal from '@/components/SecurityModal';
+import ModulePermissions from '@/components/admin/ModulePermissions';
 
 export default function SettingsPage() {
     const [settings, setSettings] = useState<any>({});
@@ -67,6 +68,8 @@ export default function SettingsPage() {
                     <Button type="submit" isLoading={loading}>Guardar Cambios</Button>
                 </div>
             </form>
+
+            <ModulePermissions />
 
             <SecurityModal
                 isOpen={isSecurityModalOpen}
