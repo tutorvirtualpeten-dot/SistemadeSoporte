@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import api from '@/lib/api';
+import { useAuth } from './AuthContext';
 
 interface Settings {
     nombre_app?: string;
@@ -21,6 +22,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export function SettingsProvider({ children }: { children: ReactNode }) {
     const [settings, setSettings] = useState<Settings>({});
     const [loading, setLoading] = useState(true);
+    const { user, loading: authLoading } = useAuth();
 
     const fetchSettings = async () => {
         try {
@@ -49,8 +51,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        fetchSettings();
-    }, []);
+        if (!authLoading) {
+            fetchSettings();
+        }
+    }, [authLoading, user]);
 
     return (
         <SettingsContext.Provider value={{ settings, loading, refreshSettings: fetchSettings }}>
