@@ -4,14 +4,20 @@ const logSystem = require('../utils/systemLogger');
 
 // @desc    Obtener configuración
 // @route   GET /api/settings
-// @access  Private (Admin)
+// @access  Public
 exports.getSettings = async (req, res) => {
     try {
         let settings = await Setting.findOne();
         if (!settings) {
             settings = await Setting.create({});
         }
-        res.json(settings);
+
+        // Retornar solo datos públicos
+        res.json({
+            nombre_app: settings.nombre_app,
+            logo_url: settings.logo_url
+            // No retornar smtp_config por seguridad
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
