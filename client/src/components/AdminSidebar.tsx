@@ -73,49 +73,46 @@ export default function AdminSidebar() {
 
                     <nav className="flex-1 px-4 py-6 space-y-2">
                         {navigation.map((item) => {
-                            {
-                                navigation.map((item) => {
-                                    // 1. Filtro base por rol hardcoded (para items fijos o seguridad base)
-                                    if (user && !item.roles.includes(user.rol)) return null;
+                            // 1. Filtro base por rol hardcoded (para items fijos o seguridad base)
+                            if (!user || !item.roles.includes(user.rol)) return null;
 
-                                    // 2. Filtro dinámico por Configuración de Módulos (si aplica)
-                                    // Mapeo href -> key en modulos
-                                    const moduleMap: { [key: string]: string } = {
-                                        '/admin/tickets': 'tickets',
-                                        '/admin/categories': 'categories',
-                                        '/admin/faqs': 'faqs',
-                                        '/admin/responses': 'responses',
-                                        '/admin/settings/catalogs': 'catalogs',
-                                        '/admin/settings': 'settings',
-                                        // 'dashboard' y 'users' (super_admin) suelen quedar fijos o se agregan aquí si se desea dinámico
-                                    };
+                            // 2. Filtro dinámico por Configuración de Módulos (si aplica)
+                            // Mapeo href -> key en modulos
+                            const moduleMap: { [key: string]: string } = {
+                                '/admin/tickets': 'tickets',
+                                '/admin/categories': 'categories',
+                                '/admin/faqs': 'faqs',
+                                '/admin/responses': 'responses',
+                                '/admin/settings/catalogs': 'catalogs',
+                                '/admin/settings': 'settings',
+                                // 'dashboard' y 'users' (super_admin) suelen quedar fijos o se agregan aquí si se desea dinámico
+                            };
 
-                                    const moduleKey = moduleMap[item.href];
+                            const moduleKey = moduleMap[item.href];
 
-                                    // Si el módulo está configurado en settings.modulos
-                                    if (moduleKey && settings.modulos && settings.modulos[moduleKey]) {
-                                        // Si NO eres super_admin Y tu rol NO está en la lista permitida -> Ocultar
-                                        if (user?.rol !== 'super_admin' && !settings.modulos[moduleKey].includes(user?.rol)) {
-                                            return null;
-                                        }
-                                    }
+                            // Si el módulo está configurado en settings.modulos
+                            if (moduleKey && settings.modulos && settings.modulos[moduleKey]) {
+                                // Si NO eres super_admin Y tu rol NO está en la lista permitida -> Ocultar
+                                if (user.rol !== 'super_admin' && !settings.modulos[moduleKey].includes(user.rol)) {
+                                    return null;
+                                }
+                            }
 
-                                    const isActive = pathname === item.href;
-                                    return (
-                                        <Link
-                                            key={item.name}
-                                            href={item.href}
-                                            className={`
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`
                                         flex items-center px-4 py-3 rounded-lg transition-colors
                                         ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}
                                     `}
-                                        >
-                                            <item.icon className="h-5 w-5 mr-3" />
-                                            <span className="font-medium">{item.name}</span>
-                                        </Link>
-                                    );
-                                })
-                            }
+                                >
+                                    <item.icon className="h-5 w-5 mr-3" />
+                                    <span className="font-medium">{item.name}</span>
+                                </Link>
+                            );
+                        })}
                     </nav>
 
                     <div className="p-4 bg-slate-800">

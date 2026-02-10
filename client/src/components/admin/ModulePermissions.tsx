@@ -11,7 +11,7 @@ interface ModuloConfig {
 }
 
 export default function ModulePermissions() {
-    const { settings, updateSettings, refreshSettings } = useSettings();
+    const { settings, refreshSettings } = useSettings();
     const [modulos, setModulos] = useState<ModuloConfig>({});
     const [loading, setLoading] = useState(false);
 
