@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Ticket, Menu, Settings, X, Files, HelpCircle, ShieldCheck, User } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
@@ -95,12 +95,17 @@ export default function AdminSidebar() {
 
                     <div className="p-4 bg-slate-800">
                         <div
-                            className="mb-4 px-2 cursor-pointer hover:bg-slate-700 rounded p-2 transition-colors"
+                            className="mb-4 cursor-pointer hover:bg-slate-700 rounded-lg p-3 transition-colors flex items-center group"
                             onClick={() => setIsProfileModalOpen(true)}
                         >
-                            <p className="text-sm font-semibold text-white">{user?.nombre}</p>
-                            <p className="text-xs text-slate-400 capitalize">{user?.rol?.replace('_', ' ')}</p>
-                            <p className="text-xs text-blue-300 mt-1">Ver Perfil</p>
+                            <div className="bg-slate-700 group-hover:bg-slate-600 p-2 rounded-full mr-3 transition-colors">
+                                <User className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="overflow-hidden">
+                                <p className="text-sm font-bold text-white truncate">{user?.nombre}</p>
+                                <p className="text-xs text-slate-300 capitalize">{user?.rol?.replace('_', ' ')}</p>
+                                <p className="text-[10px] text-blue-400 mt-0.5 font-medium">Editar Perfil</p>
+                            </div>
                         </div>
                         <Button
                             variant="secondary"
