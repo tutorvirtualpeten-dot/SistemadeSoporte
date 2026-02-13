@@ -55,7 +55,7 @@ exports.getCommentsByTicket = async (req, res) => {
         // Filtrar internos si es usuario final
         const filteredComments = comments.filter(c => {
             if (c.es_interno) {
-                return req.user.rol === 'admin' || req.user.rol === 'agente';
+                return req.user.rol === 'admin' || req.user.rol === 'agente' || req.user.rol === 'super_admin';
             }
             return true;
         });
