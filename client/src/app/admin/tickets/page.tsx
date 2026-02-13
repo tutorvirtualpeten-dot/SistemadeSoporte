@@ -14,10 +14,12 @@ interface Ticket {
     estado: string;
     prioridad: string;
     calificacion?: number;
-    usuario_id: { nombre: string };
-    agente_id?: { _id: string; nombre: string }; // Added field
+    usuario_id?: { nombre: string }; // Optional
+    solicitante_id: { nombre: string }; // For internal/portal consistency
+    agente_id?: { _id: string; nombre: string };
     datos_contacto?: { nombre_completo: string, email: string };
     fecha_creacion: string;
+    sla_due_date?: string; // New field
 }
 
 export default function AdminTicketsPage() {
@@ -56,7 +58,7 @@ export default function AdminTicketsPage() {
     const agents = useMemo(() => {
         const uniqueAgents = new Map();
         tickets.forEach(ticket => {
-            if (ticket.agente_id) {
+            if (ticket.agente_id && ticket.agente_id._id) {
                 uniqueAgents.set(ticket.agente_id._id, ticket.agente_id.nombre);
             }
         });
@@ -119,7 +121,8 @@ export default function AdminTicketsPage() {
             Solicitante: t.datos_contacto?.nombre_completo || t.usuario_id?.nombre || 'Anónimo',
             Agente: t.agente_id?.nombre || 'Sin Asignar',
             Email: t.datos_contacto?.email || '',
-            Fecha: new Date(t.fecha_creacion).toLocaleDateString()
+            Fecha: new Date(t.fecha_creacion).toLocaleDateString(),
+            SLA: t.sla_due_date ? new Date(t.sla_due_date).toLocaleDateString() : 'N/A'
         })));
         const workbook = xlsx.utils.book_new();
         xlsx.utils.book_append_sheet(workbook, worksheet, "Tickets");
@@ -133,7 +136,7 @@ export default function AdminTicketsPage() {
         const doc = new jsPDF();
 
         autoTable(doc, {
-            head: [['ID', 'Asunto', 'Estado', 'Prioridad', 'Solicitante', 'Agente', 'Fecha']],
+            head: [['ID', 'Asunto', 'Estado', 'Prioridad', 'Solicitante', 'Agente', 'Fecha', 'SLA']],
             body: filteredTickets.map(t => [
                 t.ticket_id,
                 t.titulo,
@@ -141,11 +144,49 @@ export default function AdminTicketsPage() {
                 t.prioridad,
                 t.datos_contacto?.nombre_completo || t.usuario_id?.nombre || 'Anónimo',
                 t.agente_id?.nombre || 'Sin Asignar',
-                new Date(t.fecha_creacion).toLocaleDateString()
+                new Date(t.fecha_creacion).toLocaleDateString(),
+                t.sla_due_date ? new Date(t.sla_due_date).toLocaleDateString() : 'N/A'
             ]),
         });
 
         doc.save("tickets_reporte.pdf");
+    };
+
+    // SLA Helper Function
+    const getSLAStatus = (ticket: Ticket) => {
+        if (ticket.estado === 'resuelto' || ticket.estado === 'cerrado') return null;
+
+        // Use backend SLA date if available, otherwise fallback to calculation
+        let limite: Date;
+
+        if (ticket.sla_due_date) {
+            limite = new Date(ticket.sla_due_date);
+        } else {
+            // Fallback calculation
+            if (!ticket.fecha_creacion) return null;
+            let horas = 72; // Default media
+            switch (ticket.prioridad) {
+                case 'critica': horas = 4; break;
+                case 'alta': horas = 24; break;
+                case 'media': horas = 72; break;
+                case 'baja': horas = 168; break;
+            }
+            const creacion = new Date(ticket.fecha_creacion);
+            limite = new Date(creacion.getTime() + horas * 60 * 60 * 1000);
+        }
+
+        const ahora = new Date();
+        const diff = limite.getTime() - ahora.getTime();
+        const diffHoras = diff / (1000 * 60 * 60);
+
+        if (diff < 0) {
+            return { label: `Vencido hace ${Math.abs(Math.round(diffHoras))}h`, color: 'bg-red-100 text-red-800 border-red-200' };
+        } else if (diffHoras < 4) {
+            return { label: `Vence en ${Math.round(diffHoras)}h`, color: 'bg-orange-100 text-orange-800 border-orange-200' };
+        } else {
+            const dias = Math.floor(diffHoras / 24);
+            return { label: dias > 0 ? `${dias} días restantes` : `${Math.round(diffHoras)}h restantes`, color: 'bg-green-50 text-green-700 border-green-200' };
+        }
     };
 
     const handleDeleteClick = (id: string) => {
@@ -302,103 +343,105 @@ export default function AdminTicketsPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th
-                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('ticket_id')}
-                                >
-                                    # ID {getSortIcon('ticket_id')}
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('ticket_id')}>
+                                    ID {getSortIcon('ticket_id')}
                                 </th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asunto</th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Solicitante</th>
-                                <th
-                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('estado')}
-                                >
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('titulo')}>
+                                    Asunto {getSortIcon('titulo')}
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('estado')}>
                                     Estado {getSortIcon('estado')}
                                 </th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agente</th>
-                                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calificación</th>
-                                <th
-                                    className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('fecha_creacion')}
-                                >
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('prioridad')}>
+                                    Prioridad {getSortIcon('prioridad')}
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    SLA
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Solicitante
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Agente
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('fecha_creacion')}>
                                     Fecha {getSortIcon('fecha_creacion')}
                                 </th>
-                                <th className="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th scope="col" className="relative px-6 py-3">
+                                    <span className="sr-only">Acciones</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredTickets.map((ticket) => (
-                                <tr key={ticket._id}>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-mono font-bold text-gray-900">
-                                        {ticket.ticket_id || 'N/A'}
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{ticket.titulo}</div>
-                                        <div className="text-xs text-gray-500 capitalize">{ticket.prioridad}</div>
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {ticket.datos_contacto?.nombre_completo || ticket.usuario_id?.nombre || 'Anónimo'}
-                                        <div className="text-xs text-gray-400">{ticket.datos_contacto?.email}</div>
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                        {getStatusBadge(ticket.estado)}
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        {ticket.agente_id ? (
-                                            <span className="text-gray-900">{ticket.agente_id.nombre}</span>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleTakeTicket(ticket._id)}
-                                                className="text-blue-600 hover:text-blue-900 font-semibold text-xs border border-blue-600 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-                                            >
-                                                Tomar Ticket
+                            {filteredTickets.map((ticket) => {
+                                const sla = getSLAStatus(ticket);
+                                return (
+                                    <tr key={ticket._id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            #{ticket.ticket_id}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm font-medium text-gray-900">{ticket.titulo}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {getStatusBadge(ticket.estado)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                                            {ticket.prioridad}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {sla && (
+                                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-md border ${sla.color}`}>
+                                                    {sla.label}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {ticket.solicitante_id?.nombre || ticket.usuario_id?.nombre || 'Anónimo'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            {ticket.agente_id ? (
+                                                <span className="text-gray-900">{ticket.agente_id.nombre}</span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleTakeTicket(ticket._id)}
+                                                    className="text-blue-600 hover:text-blue-900 font-semibold text-xs border border-blue-600 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
+                                                >
+                                                    Tomar Ticket
+                                                </button>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <div>{new Date(ticket.fecha_creacion).toLocaleDateString()}</div>
+                                            <div className="text-xs text-gray-400">{new Date(ticket.fecha_creacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Link href={`/admin/tickets/${ticket._id}`} className="text-blue-600 hover:text-blue-900 mr-3">
+                                                <Eye className="h-5 w-5 inline" />
+                                            </Link>
+                                            <button onClick={() => handleDeleteClick(ticket._id)} className="text-red-600 hover:text-red-900">
+                                                <Trash2 className="h-5 w-5 inline" />
                                             </button>
-                                        )}
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                                        {ticket.calificacion ? (
-                                            <div className="flex text-yellow-400">
-                                                {[...Array(ticket.calificacion)].map((_, i) => (
-                                                    <svg key={i} className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">-</span>
-                                        )}
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div>{new Date(ticket.fecha_creacion).toLocaleDateString()}</div>
-                                        <div className="text-xs text-gray-400">{new Date(ticket.fecha_creacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                    </td>
-                                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link href={`/portal/tickets/${ticket._id}`} className="text-blue-600 hover:text-blue-900 mr-4">
-                                            <Eye className="h-5 w-5 inline" />
-                                        </Link>
-                                        <button onClick={() => handleDeleteClick(ticket._id)} className="text-red-600 hover:text-red-900">
-                                            <Trash2 className="h-5 w-5 inline" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
+
                 {filteredTickets.length === 0 && !loading && (
                     <div className="p-6 text-center text-gray-500">No hay tickets que coincidan con los filtros.</div>
                 )}
-            </div>
 
-            <SecurityModal
-                isOpen={isSecurityModalOpen}
-                onClose={() => setIsSecurityModalOpen(false)}
-                onConfirm={confirmDelete}
-                title="Eliminar Ticket"
-                description="Estás a punto de eliminar un ticket permanentemente. Esta acción no se puede deshacer. Por favor confirma tu contraseña."
-            />
+                <SecurityModal
+                    isOpen={isSecurityModalOpen}
+                    onClose={() => setIsSecurityModalOpen(false)}
+                    onConfirm={confirmDelete}
+                    title="Eliminar Ticket"
+                    description="¿Estás seguro de que quieres eliminar este ticket? Esta acción no se puede deshacer."
+                />
+            </div>
         </div>
     );
 }
-

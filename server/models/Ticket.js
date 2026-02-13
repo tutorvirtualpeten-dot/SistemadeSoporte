@@ -88,13 +88,35 @@ const ticketSchema = new mongoose.Schema({
     },
     mensaje_resolucion: { // Mensaje opcional del usuario al cerrar
         type: String
+    },
+    // SLA: Fecha límite de resolución
+    fecha_limite_resolucion: {
+        type: Date
     }
 });
 
 const Counter = require('./Counter');
 
-ticketSchema.pre('save', async function () {
-    if (!this.isNew) return;
+ticketSchema.pre('save', async function (next) { // Add next
+    // Calcular SLA si es nuevo o si cambió la prioridad
+    if (this.isNew || this.isModified('prioridad')) {
+        const now = new Date();
+        // Definir horas a sumar según prioridad
+        const slas = {
+            'critica': 4,      // 4 horas
+            'alta': 24,        // 24 horas (1 día)
+            'media': 72,       // 72 horas (3 días)
+            'baja': 168        // 168 horas (7 días)
+        };
+
+        const horas = slas[this.prioridad] || 72; // Default media
+
+        // Clonar fecha actual y sumar horas
+        const limite = new Date(now.getTime() + horas * 60 * 60 * 1000);
+        this.fecha_limite_resolucion = limite;
+    }
+
+    if (!this.isNew) return next();
 
     try {
         const counter = await Counter.findByIdAndUpdate(
@@ -105,8 +127,10 @@ ticketSchema.pre('save', async function () {
 
         // Si es el primero, seq será 1. Podemos sumar 10000 para que empiece en 10001
         this.ticket_id = counter.seq + 10000;
+        next();
     } catch (error) {
-        throw error; // Mongoose capturará esto como error de validación/guardado
+        // throw error; // Mongoose capturará esto como error de validación/guardado
+        next(error);
     }
 });
 

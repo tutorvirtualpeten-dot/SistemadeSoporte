@@ -15,6 +15,7 @@ interface Ticket {
     prioridad: string;
     fecha_creacion: string;
     ticket_id?: number;
+    sla_due_date?: string;
 }
 
 export default function PortalDashboard() {
@@ -44,6 +45,43 @@ export default function PortalDashboard() {
         };
         fetchTickets();
     }, [sort]);
+
+    const getSLAStatus = (ticket: Ticket) => {
+        if (ticket.estado === 'resuelto' || ticket.estado === 'cerrado') return null;
+
+        // Use backend SLA date if available, otherwise fallback to calculation
+        let limite: Date;
+
+        if (ticket.sla_due_date) {
+            limite = new Date(ticket.sla_due_date);
+        } else {
+            // Fallback calculation
+            if (!ticket.fecha_creacion) return null;
+            let horas = 72; // Default media
+            switch (ticket.prioridad) {
+                case 'critica': horas = 4; break;
+                case 'alta': horas = 24; break;
+                case 'media': horas = 72; break;
+                case 'baja': horas = 168; break;
+            }
+            const creacion = new Date(ticket.fecha_creacion);
+            limite = new Date(creacion.getTime() + horas * 60 * 60 * 1000);
+        }
+
+        const ahora = new Date();
+        const diff = limite.getTime() - ahora.getTime();
+        const diffHoras = diff / (1000 * 60 * 60);
+
+        if (diff < 0) {
+            return { label: `Vencido hace ${Math.abs(Math.round(diffHoras))}h`, color: 'bg-red-100 text-red-800 border-red-200' };
+        } else if (diffHoras < 4) {
+            return { label: `Vence in ${Math.round(diffHoras)}h`, color: 'bg-orange-100 text-orange-800 border-orange-200' };
+        }
+        // No displaying green for portal to keep it simple, or maybe yes?
+        // Let's display it.
+        const dias = Math.floor(diffHoras / 24);
+        return { label: dias > 0 ? `${dias} días restantes` : `${Math.round(diffHoras)}h restantes`, color: 'bg-green-50 text-green-700 border-green-200' };
+    };
 
     if (loading) return <div>Cargando tickets...</div>;
 
@@ -107,9 +145,17 @@ export default function PortalDashboard() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="ml-5 flex-shrink-0">
+                                            <div className="ml-5 flex-shrink-0 flex items-center space-x-2">
+                                                {(() => {
+                                                    const sla = getSLAStatus(ticket);
+                                                    return sla ? (
+                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full border ${sla.color}`}>
+                                                            {sla.label}
+                                                        </span>
+                                                    ) : null;
+                                                })()}
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                           ${ticket.estado === 'abierto' ? 'bg-green-100 text-green-800' :
+                            ${ticket.estado === 'abierto' ? 'bg-green-100 text-green-800' :
                                                         ticket.estado === 'cerrado' ? 'bg-gray-100 text-gray-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                     {ticket.estado}
                                                 </span>
