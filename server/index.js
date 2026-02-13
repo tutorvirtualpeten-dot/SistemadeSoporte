@@ -56,6 +56,7 @@ app.use('/api/audit', auditRoutes);
 // app.use('/api/stats', statsRoutes);
 app.use('/api/ticket-sources', ticketSourceRoutes);
 app.use('/api/service-types', serviceTypeRoutes);
+app.use('/api/cron', require('./routes/cronRoutes'));
 
 
 app.get('/', (req, res) => {

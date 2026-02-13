@@ -401,6 +401,31 @@ exports.updateTicket = async (req, res) => {
                 nuevo: req.body.prioridad,
                 descripcion: `Prioridad cambiada a ${req.body.prioridad}`
             });
+
+            // NOTIFICAR AL AGENTE ASIGNADO
+            if (actualizado.agente_id) {
+                // In-App
+                await notifyUser(
+                    actualizado.agente_id._id,
+                    'TICKET_UPDATED',
+                    `⚠️ Cambio de Prioridad #${actualizado.ticket_id}`,
+                    `La prioridad ha cambiado de ${ticket.prioridad} a ${req.body.prioridad}`,
+                    `/portal/tickets/${actualizado._id}`
+                );
+
+                // Email
+                if (actualizado.agente_id.email) {
+                    await sendEmail({
+                        to: actualizado.agente_id.email,
+                        subject: `⚠️ Cambio de Prioridad: Ticket #${actualizado.ticket_id}`,
+                        text: `El ticket #${actualizado.ticket_id} ha cambiado de prioridad ${ticket.prioridad} a ${req.body.prioridad}.`,
+                        html: `<p>La prioridad del ticket <strong>#${actualizado.ticket_id}</strong> ha cambiado.</p>
+                               <p><strong>Anterior:</strong> ${ticket.prioridad}</p>
+                               <p><strong>Nueva:</strong> ${req.body.prioridad}</p>
+                               <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${actualizado._id}">Ver Ticket</a>`
+                    });
+                }
+            }
         }
 
         res.json(actualizado);

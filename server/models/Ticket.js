@@ -92,7 +92,12 @@ const ticketSchema = new mongoose.Schema({
     // SLA: Fecha límite de resolución
     fecha_limite_resolucion: {
         type: Date
-    }
+    },
+    // Flag para saber si ya se notificó el vencimiento
+    sla_notified: {
+        type: Boolean,
+        default: false
+    },
 });
 
 const Counter = require('./Counter');
