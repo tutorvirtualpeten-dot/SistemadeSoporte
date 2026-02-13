@@ -67,10 +67,13 @@ exports.updateSettings = async (req, res) => {
         // Object.assign(settings, req.body);
         // const updated = await settings.save();
 
+        // remove _id and __v to avoid immutable field error
+        const { _id, __v, ...updateData } = req.body;
+
         // Use findOneAndUpdate for atomic/safer update
         const updated = await Setting.findOneAndUpdate(
             {},
-            { $set: req.body },
+            { $set: updateData },
             { new: true, upsert: true }
         );
 
