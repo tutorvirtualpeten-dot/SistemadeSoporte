@@ -25,6 +25,13 @@ const settingSchema = new mongoose.Schema({
         catalogs: { type: [String], default: ['admin', 'agente'] },
         audit: { type: [String], default: [] },
         settings: { type: [String], default: ['admin'] }
+    },
+    // Configuración de SLA (Horas por prioridad)
+    sla: {
+        critica: { type: Number, default: 4 },
+        alta: { type: Number, default: 24 },
+        media: { type: Number, default: 72 },
+        baja: { type: Number, default: 168 }
     }
 });
 

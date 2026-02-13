@@ -97,17 +97,32 @@ const ticketSchema = new mongoose.Schema({
 
 const Counter = require('./Counter');
 
-ticketSchema.pre('save', async function (next) { // Add next
+ticketSchema.pre('save', async function () {
     // Calcular SLA si es nuevo o si cambió la prioridad
     if (this.isNew || this.isModified('prioridad')) {
         const now = new Date();
-        // Definir horas a sumar según prioridad
-        const slas = {
-            'critica': 4,      // 4 horas
-            'alta': 24,        // 24 horas (1 día)
-            'media': 72,       // 72 horas (3 días)
-            'baja': 168        // 168 horas (7 días)
+
+        // Obtener configuración de SLA desde la BD
+        const Setting = mongoose.model('Setting');
+        const settings = await Setting.findOne();
+
+        // Valores por defecto
+        let slas = {
+            'critica': 4,
+            'alta': 24,
+            'media': 72,
+            'baja': 168
         };
+
+        // Sobreescribir con valores de BD si existen
+        if (settings && settings.sla) {
+            slas = {
+                'critica': settings.sla.critica || 4,
+                'alta': settings.sla.alta || 24,
+                'media': settings.sla.media || 72,
+                'baja': settings.sla.baja || 168
+            };
+        }
 
         const horas = slas[this.prioridad] || 72; // Default media
 
@@ -116,7 +131,7 @@ ticketSchema.pre('save', async function (next) { // Add next
         this.fecha_limite_resolucion = limite;
     }
 
-    if (!this.isNew) return next();
+    if (!this.isNew) return;
 
     try {
         const counter = await Counter.findByIdAndUpdate(
@@ -127,10 +142,9 @@ ticketSchema.pre('save', async function (next) { // Add next
 
         // Si es el primero, seq será 1. Podemos sumar 10000 para que empiece en 10001
         this.ticket_id = counter.seq + 10000;
-        next();
     } catch (error) {
-        // throw error; // Mongoose capturará esto como error de validación/guardado
-        next(error);
+        // Mongoose capturará esto como error de validación/guardado
+        throw error;
     }
 });
 

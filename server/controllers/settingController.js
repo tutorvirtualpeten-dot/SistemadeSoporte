@@ -27,6 +27,17 @@ exports.getSettings = async (req, res) => {
             await settings.save();
         }
 
+        // Lazy migration: Inicializar SLA
+        if (!settings.sla || !settings.sla.critica) {
+            settings.sla = {
+                critica: 4,
+                alta: 24,
+                media: 72,
+                baja: 168
+            };
+            await settings.save();
+        }
+
         const publicSettings = {
             nombre_app: settings.nombre_app,
             logo_url: settings.logo_url

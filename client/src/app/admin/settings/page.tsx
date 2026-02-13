@@ -64,6 +64,36 @@ export default function SettingsPage() {
                     </div>
                 )}
 
+                <div className="border-t pt-6">
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Configuración de SLA (Horas)</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <Input
+                            label="Prioridad CRÍTICA"
+                            type="number"
+                            value={settings.sla?.critica || 4}
+                            onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, critica: parseInt(e.target.value) } })}
+                        />
+                        <Input
+                            label="Prioridad ALTA"
+                            type="number"
+                            value={settings.sla?.alta || 24}
+                            onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, alta: parseInt(e.target.value) } })}
+                        />
+                        <Input
+                            label="Prioridad MEDIA"
+                            type="number"
+                            value={settings.sla?.media || 72}
+                            onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, media: parseInt(e.target.value) } })}
+                        />
+                        <Input
+                            label="Prioridad BAJA"
+                            type="number"
+                            value={settings.sla?.baja || 168}
+                            onChange={(e) => setSettings({ ...settings, sla: { ...settings.sla, baja: parseInt(e.target.value) } })}
+                        />
+                    </div>
+                </div>
+
                 <div className="flex justify-end items-center mt-6">
                     <Button type="submit" isLoading={loading}>Guardar Cambios</Button>
                 </div>

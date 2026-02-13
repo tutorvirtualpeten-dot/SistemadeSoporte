@@ -118,16 +118,6 @@ exports.createTicket = async (req, res) => {
             }
         }
 
-        // CALCULAR SLA (Fecha límite)
-        let horasSLA = 72; // Default media
-        if (prioridad === 'critica') horasSLA = 4;
-        else if (prioridad === 'alta') horasSLA = 24;
-        else if (prioridad === 'media') horasSLA = 72;
-        else if (prioridad === 'baja') horasSLA = 168;
-
-        const fecha_limite_resolucion = new Date();
-        fecha_limite_resolucion.setTime(fecha_limite_resolucion.getTime() + (horasSLA * 60 * 60 * 1000));
-
         console.log('💾 Creating ticket in database...');
         const nuevoTicket = await Ticket.create({
             titulo,
@@ -141,8 +131,8 @@ exports.createTicket = async (req, res) => {
             service_type_id,
             creado_por_id,
             agente_id: agente_asignado_id, // Nueva asignación
-            estado: (isAgentOrAdmin && estado) ? estado : 'abierto',
-            fecha_limite_resolucion // SLA calculado
+            estado: (isAgentOrAdmin && estado) ? estado : 'abierto'
+            // fecha_limite_resolucion se calcula en el hook pre-save del modelo
         });
 
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
