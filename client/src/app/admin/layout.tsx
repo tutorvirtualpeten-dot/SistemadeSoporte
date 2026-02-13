@@ -1,3 +1,5 @@
+'use client';
+
 import AdminSidebar from '@/components/AdminSidebar';
 import NotificationBell from '@/components/NotificationBell';
 import { useAuth } from '@/context/AuthContext';
