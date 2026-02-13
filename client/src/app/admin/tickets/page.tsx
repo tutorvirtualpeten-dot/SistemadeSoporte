@@ -370,7 +370,8 @@ export default function AdminTicketsPage() {
                                         )}
                                     </td>
                                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {new Date(ticket.fecha_creacion).toLocaleDateString()}
+                                        <div>{new Date(ticket.fecha_creacion).toLocaleDateString()}</div>
+                                        <div className="text-xs text-gray-400">{new Date(ticket.fecha_creacion).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                     </td>
                                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <Link href={`/portal/tickets/${ticket._id}`} className="text-blue-600 hover:text-blue-900 mr-4">
