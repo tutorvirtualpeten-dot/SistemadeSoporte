@@ -8,12 +8,6 @@ const settingSchema = new mongoose.Schema({
     logo_url: {
         type: String
     },
-    smtp_config: {
-        host: String,
-        port: Number,
-        user: String,
-        pass: String
-    },
     // Configuración de Módulos (Permisos de acceso por rol)
     // admin, agente (super_admin siempre tiene acceso implícito)
     modulos: {
