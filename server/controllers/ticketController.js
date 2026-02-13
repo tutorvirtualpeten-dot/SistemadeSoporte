@@ -89,6 +89,35 @@ exports.createTicket = async (req, res) => {
             }
         }
 
+        // ASIGNACIÓN AUTOMÁTICA (Round Robin - Least Loaded)
+        let agente_asignado_id = null;
+
+        // Si el usuario envía un agente específico (solo Admins/Agentes pueden forzarlo)
+        if (isAgentOrAdmin && req.body.agente_id) {
+            agente_asignado_id = req.body.agente_id;
+        } else {
+            // Buscar el agente con MENOS tickets activos (abierto/en_progreso)
+            const agentes = await User.find({ rol: 'agente' }).select('_id nombre');
+
+            if (agentes.length > 0) {
+                // Obtener conteos para cada agente
+                const cargas = await Promise.all(agentes.map(async (agente) => {
+                    const count = await Ticket.countDocuments({
+                        agente_id: agente._id,
+                        estado: { $in: ['abierto', 'en_progreso'] }
+                    });
+                    return { id: agente._id, count };
+                }));
+
+                // Ordenar por carga ascendente (el reporte con menos tickets primero)
+                cargas.sort((a, b) => a.count - b.count);
+
+                // Asignar al primero
+                agente_asignado_id = cargas[0].id;
+                console.log(`🤖 Auto-asignando ticket a Agente ID: ${agente_asignado_id} (Carga actual: ${cargas[0].count})`);
+            }
+        }
+
         console.log('💾 Creating ticket in database...');
         const nuevoTicket = await Ticket.create({
             titulo,
@@ -101,11 +130,11 @@ exports.createTicket = async (req, res) => {
             source_id,
             service_type_id,
             creado_por_id,
-            estado: (isAgentOrAdmin && estado) ? estado : 'abierto' // Agentes pueden definir estado, usuarios normales no
+            agente_id: agente_asignado_id, // Nueva asignación
+            estado: (isAgentOrAdmin && estado) ? estado : 'abierto'
         });
 
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
-        // No notificar al creador si es el mismo agente
         const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
         admins.forEach(admin => {
             if (req.user && admin._id.toString() === req.user.id) return; // No auto-notificar
@@ -118,6 +147,17 @@ exports.createTicket = async (req, res) => {
                 `/portal/tickets/${nuevoTicket._id}`
             );
         });
+
+        // NOTIFICACIÓN ESPECÍFICA AL AGENTE ASIGNADO (Si es diferente al creador)
+        if (agente_asignado_id && (!req.user || agente_asignado_id.toString() !== req.user.id)) {
+            notifyUser(
+                agente_asignado_id,
+                'TICKET_ASSIGNED',
+                `¡Nuevo Ticket Asignado! #${nuevoTicket.ticket_id}`,
+                `Se te ha asignado automáticamente: "${titulo}"`,
+                `/portal/tickets/${nuevoTicket._id}`
+            );
+        }
 
         // LOG ACTIVIDAD: Creación
         if (req.user) {
