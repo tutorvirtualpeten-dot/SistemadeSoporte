@@ -200,6 +200,47 @@ exports.getDashboardStats = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
+        // 6. Tickets por Categoría (Para Donut Chart)
+        const ticketsByCategory = await Ticket.aggregate([
+            { $match: dateFilter },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: 'categoria_id',
+                    foreignField: '_id',
+                    as: 'categoria'
+                }
+            },
+            { $unwind: { path: '$categoria', preserveNullAndEmptyArrays: true } },
+            {
+                $group: {
+                    _id: { $ifNull: ['$categoria.nombre', 'Sin Categoría'] },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // 7. Tickets por Agente (Para Bar Chart Horizontal)
+        const ticketsByAgent = await Ticket.aggregate([
+            { $match: dateFilter },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'agente_id',
+                    foreignField: '_id',
+                    as: 'agente'
+                }
+            },
+            { $unwind: { path: '$agente', preserveNullAndEmptyArrays: true } },
+            {
+                $group: {
+                    _id: { $ifNull: ['$agente.nombre', 'Sin Asignar'] },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { count: -1 } } // Ordenar por carga de trabajo descendente
+        ]);
+
         res.json({
             summary: {
                 totalTickets,
@@ -211,7 +252,9 @@ exports.getDashboardStats = async (req, res) => {
                 byStatus: ticketsByStatus,
                 byPriority: ticketsByPriority,
                 byUserType: ticketsByUserType,
-                dailyTrend: dailyTrend
+                dailyTrend: dailyTrend,
+                byCategory: ticketsByCategory,
+                byAgent: ticketsByAgent
             }
         });
     } catch (error) {

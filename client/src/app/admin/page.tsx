@@ -45,6 +45,8 @@ interface DashboardData {
         byPriority: { _id: string; count: number }[];
         byUserType: { _id: string; count: number }[];
         dailyTrend: { _id: string; count: number }[];
+        byCategory: { _id: string; count: number }[];
+        byAgent: { _id: string; count: number }[];
     };
 }
 
@@ -373,6 +375,49 @@ export default function AdminDashboardPage() {
                                 <Tooltip />
                                 <Line type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} name="Tickets" />
                             </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Tickets by Category - Donut Chart */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Tickets por Categoría</h3>
+                    <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data.charts.byCategory}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="count"
+                                    nameKey="_id"
+                                >
+                                    {data.charts.byCategory.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Tickets by Agent - Bar Chart */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Carga de Trabajo por Agente</h3>
+                    <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.charts.byAgent} layout="vertical" margin={{ left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" />
+                                <YAxis dataKey="_id" type="category" width={100} tick={{ fontSize: 12 }} />
+                                <Tooltip />
+                                <Bar dataKey="count" fill="#8b5cf6" name="Tickets" radius={[0, 4, 4, 0]} />
+                            </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>

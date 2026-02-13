@@ -1,0 +1,77 @@
+﻿
+> client@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please 
+use "proxy" instead. 
+Learn more: https://ne
+xtjs.org/docs/messages
+/middleware-to-proxy
+En línea: 1 Carácter: 
+1
++ & "C:\Program Files\
+nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (ÔÜá The "m   
+ iddle...leware-to    
+-proxy:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 15.8s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/23) ...
+  Generating static pages using 7 workers (5/23) 
+  Generating static pages using 7 workers (11/23) 
+  Generating static pages using 7 workers (17/23) 
+Ô£ô Generating static pages using 7 workers (23/23) in 1908.5ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ Ôùï /admin
+Ôö£ Ôùï /admin/audit
+Ôö£ Ôùï /admin/categories
+Ôö£ Ôùï /admin/faq
+Ôö£ Ôùï /admin/faqs
+Ôö£ Ôùï /admin/responses
+Ôö£ Ôùï /admin/settings
+Ôö£ Ôùï /admin/settings/catalogs
+Ôö£ Ôùï /admin/tickets
+Ôö£ Ôùï /admin/tickets/new
+Ôö£ Ôùï /admin/users
+Ôö£ Ôùï /auth/login
+Ôö£ Ôùï /auth/register
+Ôö£ Ôùï /consultar
+Ôö£ Ôùï /faq
+Ôö£ Ôùï /portal
+Ôö£ Ôùï /portal/create
+Ôö£ Ôùï /portal/faq
+Ôö£ ãÆ /portal/tickets/[id]
+Ôöö Ôùï /solicitud
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+
