@@ -162,7 +162,9 @@ exports.createTicket = async (req, res) => {
                             <li><strong>Solicitante:</strong> ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}</li>
                             <li><strong>Asunto:</strong> ${titulo}</li>
                            </ul>
-                           <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${nuevoTicket._id}">Ver Ticket</a>`
+                           <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${nuevoTicket._id}">Ver Ticket</a>
+                           <hr/>
+                           <p style="color: #666; font-size: 12px;"><em>⚠️ Este es un correo automático. Por favor, NO responda a este mensaje. Para atender el ticket, ingrese a la plataforma.</em></p>`
                 }).catch(err => console.error('Error sending admin email:', err));
             }
         }
@@ -181,7 +183,9 @@ exports.createTicket = async (req, res) => {
                        <p><strong>Ticket ID:</strong> #${nuevoTicket.ticket_id}</p>
                        <p><strong>Estado:</strong> Abierto</p>
                        <hr/>
-                       <p>Un agente revisará tu caso a la brevedad posible.</p>`
+                       <p>Un agente revisará tu caso a la brevedad posible.</p>
+                       <hr/>
+                       <p style="color: #666; font-size: 12px;"><em>⚠️ Este es un correo automático. Por favor, NO responda a este mensaje. Recibirás actualizaciones en tu correo cuando haya cambios en tu ticket.</em></p>`
             }).catch(err => console.error('Error sending confirmation email:', err));
         }
 
@@ -460,7 +464,9 @@ exports.updateTicket = async (req, res) => {
                         html: `<p>La prioridad del ticket <strong>#${actualizado.ticket_id}</strong> ha cambiado.</p>
                                <p><strong>Anterior:</strong> ${ticket.prioridad}</p>
                                <p><strong>Nueva:</strong> ${req.body.prioridad}</p>
-                               <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${actualizado._id}">Ver Ticket</a>`
+                               <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${actualizado._id}">Ver Ticket</a>
+                               <hr/>
+                               <p style="color: #666; font-size: 12px;"><em>⚠️ Este es un correo automático. Por favor, NO responda a este mensaje. Para atender el ticket, ingrese a la plataforma.</em></p>`
                     });
                 }
             }
