@@ -5,12 +5,32 @@ import { useSettings } from '@/context/SettingsContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 import LogoImage from '@/components/LogoImage';
 import NotificationBell from '@/components/NotificationBell';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-    const { user, logout } = useAuth();
+    const { user, logout, loading } = useAuth();
     const { settings } = useSettings();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/auth/login');
+        }
+    }, [user, loading, router]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-gray-100">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (!user) return null;
 
     return (
         <div className="min-h-screen bg-gray-100">
