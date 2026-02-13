@@ -65,9 +65,7 @@ exports.addComment = async (req, res) => {
                             html: `<p>Hola <strong>${owner.nombre}</strong>,</p>
                                    <p>Has recibido una nueva respuesta en tu ticket.</p>
                                    <blockquote>${mensaje}</blockquote>
-                                   <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${ticket._id}">Ver Ticket</a>
-                                   <hr/>
-                                   <p style="color: #666; font-size: 12px;"><em>⚠️ Este es un correo automático. Por favor, NO responda a este mensaje. Para responder, ingrese a la plataforma.</em></p>`
+                                   <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${ticket._id}">Ver Ticket</a>`
                         });
                     }
                 }
