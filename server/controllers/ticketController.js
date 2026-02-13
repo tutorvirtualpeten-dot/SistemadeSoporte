@@ -137,9 +137,10 @@ exports.createTicket = async (req, res) => {
 
         // NOTIFICACIÓN INTERNA (Admins/Agentes)
         const admins = await User.find({ rol: { $in: ['admin', 'super_admin', 'agente'] } });
-        admins.forEach(admin => {
-            if (req.user && admin._id.toString() === req.user.id) return; // No auto-notificar
+        for (const admin of admins) {
+            if (req.user && admin._id.toString() === req.user.id) continue; // No auto-notificar
 
+            // In-App
             notifyUser(
                 admin._id,
                 'NEW_TICKET',
@@ -147,10 +148,46 @@ exports.createTicket = async (req, res) => {
                 `${nuevoTicket.datos_contacto?.nombre_completo || 'Usuario'} ha creado: "${titulo}"`,
                 `/portal/tickets/${nuevoTicket._id}`
             );
-        });
+
+            // Email a Admins/Agentes
+            if (admin.email) {
+                sendEmail({
+                    to: admin.email,
+                    subject: `Nuevo Ticket #${nuevoTicket.ticket_id}: ${titulo}`,
+                    text: `Se ha creado un nuevo ticket.\nSolicitante: ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}\nTítulo: ${titulo}\n\nVer en plataforma: /portal/tickets/${nuevoTicket._id}`,
+                    html: `<p>Hola <strong>${admin.nombre}</strong>,</p>
+                           <p>Se ha recibido un nuevo ticket de soporte.</p>
+                           <ul>
+                            <li><strong>Ticket:</strong> #${nuevoTicket.ticket_id}</li>
+                            <li><strong>Solicitante:</strong> ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}</li>
+                            <li><strong>Asunto:</strong> ${titulo}</li>
+                           </ul>
+                           <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${nuevoTicket._id}">Ver Ticket</a>`
+                }).catch(err => console.error('Error sending admin email:', err));
+            }
+        }
+
+        // CONFIRMACIÓN AL USUARIO (Email)
+        const userEmail = datos_contacto?.email || (req.user ? req.user.email : null);
+        const userName = datos_contacto?.nombre_completo || (req.user ? req.user.nombre : 'Usuario');
+
+        if (userEmail) {
+            sendEmail({
+                to: userEmail,
+                subject: `Ticket Recibido: #${nuevoTicket.ticket_id}`,
+                text: `Hola ${userName},\n\nHemos recibido tu solicitud "${titulo}".\nUn agente la revisará pronto.\n\nNúmero de Ticket: #${nuevoTicket.ticket_id}`,
+                html: `<p>Hola <strong>${userName}</strong>,</p>
+                       <p>Hemos recibido correctamente tu solicitud de soporte.</p>
+                       <p><strong>Ticket ID:</strong> #${nuevoTicket.ticket_id}</p>
+                       <p><strong>Estado:</strong> Abierto</p>
+                       <hr/>
+                       <p>Un agente revisará tu caso a la brevedad posible.</p>`
+            }).catch(err => console.error('Error sending confirmation email:', err));
+        }
 
         // NOTIFICACIÓN ESPECÍFICA AL AGENTE ASIGNADO (Si es diferente al creador)
         if (agente_asignado_id && (!req.user || agente_asignado_id.toString() !== req.user.id)) {
+            // Ya cubierto arriba si es admin/agente, pero reforzamos la asignación específica
             notifyUser(
                 agente_asignado_id,
                 'TICKET_ASSIGNED',
@@ -158,6 +195,7 @@ exports.createTicket = async (req, res) => {
                 `Se te ha asignado automáticamente: "${titulo}"`,
                 `/portal/tickets/${nuevoTicket._id}`
             );
+            // Email específico de asignación (opcional, ya recibe el de "Nuevo Ticket" si es agente, pero este es más directo)
         }
 
         // LOG ACTIVIDAD: Creación
