@@ -48,7 +48,8 @@ exports.getSettings = async (req, res) => {
             return res.json({
                 ...publicSettings,
                 smtp_config: settings.smtp_config, // Cuidado: No exponer pass en producción idealmente
-                modulos: settings.modulos
+                modulos: settings.modulos,
+                sla: settings.sla
             });
         }
 
@@ -76,8 +77,6 @@ exports.updateSettings = async (req, res) => {
             { $set: updateData },
             { new: true, upsert: true }
         );
-
-        console.log('Settings updated via findOneAndUpdate:', updated);
 
         await logSystem(req.user._id, 'UPDATE_SETTINGS', { changes: req.body }, req);
 
