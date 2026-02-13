@@ -397,7 +397,7 @@ export default function AdminTicketsPage() {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {ticket.solicitante_id?.nombre || ticket.usuario_id?.nombre || 'Anónimo'}
+                                            {ticket.solicitante_id?.nombre || ticket.usuario_id?.nombre || ticket.datos_contacto?.nombre_completo || 'Anónimo'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             {ticket.agente_id ? (
