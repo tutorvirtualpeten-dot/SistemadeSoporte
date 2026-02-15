@@ -1,6 +1,7 @@
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const sendEmail = require('../utils/emailService');
+const { sendTicketNotification } = require('../utils/emailService');
 const Notification = require('../models/Notification');
 const notifyUser = require('../utils/notifyUser');
 const logActivity = require('../utils/activityLogger');
@@ -204,6 +205,9 @@ exports.createTicket = async (req, res) => {
                 descripcion: isAgentOrAdmin && !usuario_id ? 'Ticket Interno (Invitado) creado por agente' : 'Ticket creado'
             });
         }
+
+        // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Creación de Ticket
+        await sendTicketNotification('TICKET_CREATED', nuevoTicket);
 
         res.status(201).json(nuevoTicket);
     } catch (error) {
@@ -410,6 +414,11 @@ exports.updateTicket = async (req, res) => {
                 `Se te ha asignado el ticket: "${actualizado.titulo}"`,
                 `/portal/tickets/${actualizado._id}`
             );
+
+            // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Asignación de Agente
+            await sendTicketNotification('AGENT_ASSIGNED', actualizado, {
+                agentName: actualizado.agente_id.nombre
+            });
         }
 
         // LOG ACTIVIDAD: Cambio de Estado
@@ -430,6 +439,12 @@ exports.updateTicket = async (req, res) => {
                     `/portal/tickets/${actualizado._id}`
                 );
             }
+
+            // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Cambio de Estado
+            await sendTicketNotification('STATUS_CHANGED', actualizado, {
+                oldStatus: ticket.estado,
+                newStatus: req.body.estado
+            });
         }
 
         // LOG ACTIVIDAD: Cambio de Prioridad
