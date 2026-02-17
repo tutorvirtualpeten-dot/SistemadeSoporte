@@ -1,7 +1,12 @@
-const { Resend } = require('resend');
+/**
+ * Servicio de Email usando Brevo (Sendinblue)
+ * Reemplaza a Resend para evitar restricciones de verificación de destinatarios
+ */
+
+const brevo = require('@getbrevo/brevo');
 
 /**
- * Función genérica para enviar emails usando Resend
+ * Función genérica para enviar emails usando Brevo
  * @param {Object} params - Parámetros del email
  * @param {string|string[]} params.to - Destinatario(s)
  * @param {string} params.subject - Asunto del email
@@ -12,36 +17,46 @@ const { Resend } = require('resend');
 const sendEmail = async ({ to, subject, text, html }) => {
     try {
         // 1. Verificar que existe la API key
-        const apiKey = process.env.RESEND_API_KEY;
+        const apiKey = process.env.BREVO_API_KEY;
         if (!apiKey) {
-            console.warn('⚠️ RESEND_API_KEY no configurada. No se envió el correo.');
+            console.warn('⚠️ BREVO_API_KEY no configurada. No se envió el correo.');
             return false;
         }
 
-        // 2. Crear cliente de Resend
-        const resend = new Resend(apiKey);
+        // 2. Configurar cliente de Brevo
+        const apiInstance = new brevo.TransactionalEmailsApi();
+        apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
         // 3. Configurar remitente
-        const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+        const fromEmail = process.env.BREVO_FROM_EMAIL || 'noreply@example.com';
+        const fromName = process.env.BREVO_FROM_NAME || 'Sistema de Soporte';
 
-        // 4. Enviar correo
-        const { data, error } = await resend.emails.send({
-            from: fromEmail,
-            to: Array.isArray(to) ? to : [to],
-            subject,
-            html: html || text, // Resend prefiere HTML, usa text como fallback
-        });
+        // 4. Preparar destinatarios
+        const recipients = Array.isArray(to)
+            ? to.map(email => ({ email }))
+            : [{ email: to }];
 
-        if (error) {
-            console.error('❌ Error de Resend:', error);
-            return false;
+        // 5. Crear objeto de email
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.sender = { email: fromEmail, name: fromName };
+        sendSmtpEmail.to = recipients;
+        sendSmtpEmail.subject = subject;
+        sendSmtpEmail.htmlContent = html || `<p>${text}</p>`;
+        if (text && !html) {
+            sendSmtpEmail.textContent = text;
         }
 
-        console.log('✅ Correo enviado via Resend:', data.id);
+        // 6. Enviar correo
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+
+        console.log('✅ Correo enviado via Brevo:', data.messageId);
         return true;
 
     } catch (error) {
-        console.error('❌ Error enviando correo:', error);
+        console.error('❌ Error enviando correo con Brevo:', error.message);
+        if (error.response) {
+            console.error('Detalles del error:', error.response.body);
+        }
         return false; // No lanzar error para evitar bloquear el flujo principal
     }
 };
@@ -202,13 +217,26 @@ const emailTemplates = {
  */
 const sendTicketNotification = async (type, ticket, extraData = {}) => {
     try {
-        // Obtener destinatario desde variable de entorno
-        const recipient = process.env.RESEND_RECIPIENT_EMAIL;
+        // Obtener destinatarios desde variable de entorno (soporta múltiples emails separados por comas)
+        const recipientString = process.env.BREVO_RECIPIENT_EMAIL;
 
-        if (!recipient) {
-            console.warn('⚠️ RESEND_RECIPIENT_EMAIL no configurado. No se envió notificación.');
+        if (!recipientString) {
+            console.warn('⚠️ BREVO_RECIPIENT_EMAIL no configurado. No se envió notificación.');
             return false;
         }
+
+        // Convertir string de emails separados por comas en array y limpiar espacios
+        const recipients = recipientString
+            .split(',')
+            .map(email => email.trim())
+            .filter(email => email.length > 0);
+
+        if (recipients.length === 0) {
+            console.warn('⚠️ No se encontraron destinatarios válidos en BREVO_RECIPIENT_EMAIL.');
+            return false;
+        }
+
+        console.log(`📧 Enviando notificación a ${recipients.length} destinatario(s):`, recipients.join(', '));
 
         let subject = '';
         let html = '';
@@ -235,7 +263,7 @@ const sendTicketNotification = async (type, ticket, extraData = {}) => {
         }
 
         return await sendEmail({
-            to: recipient,
+            to: recipients, // Ahora es un array de emails
             subject,
             html
         });
@@ -248,4 +276,3 @@ const sendTicketNotification = async (type, ticket, extraData = {}) => {
 
 module.exports = sendEmail;
 module.exports.sendTicketNotification = sendTicketNotification;
-

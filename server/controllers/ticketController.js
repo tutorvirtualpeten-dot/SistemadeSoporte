@@ -151,40 +151,41 @@ exports.createTicket = async (req, res) => {
             );
 
             // Email a Admins/Agentes
-            if (admin.email) {
-                sendEmail({
-                    to: admin.email,
-                    subject: `Nuevo Ticket #${nuevoTicket.ticket_id}: ${titulo}`,
-                    text: `Se ha creado un nuevo ticket.\nSolicitante: ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}\nTítulo: ${titulo}\n\nVer en plataforma: /portal/tickets/${nuevoTicket._id}`,
-                    html: `<p>Hola <strong>${admin.nombre}</strong>,</p>
-                           <p>Se ha recibido un nuevo ticket de soporte.</p>
-                           <ul>
-                            <li><strong>Ticket:</strong> #${nuevoTicket.ticket_id}</li>
-                            <li><strong>Solicitante:</strong> ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}</li>
-                            <li><strong>Asunto:</strong> ${titulo}</li>
-                           </ul>
-                           <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${nuevoTicket._id}">Ver Ticket</a>`
-                }).catch(err => console.error('Error sending admin email:', err));
-            }
+            // if (admin.email) {
+            //     sendEmail({
+            //         to: admin.email,
+            //         subject: `Nuevo Ticket #${nuevoTicket.ticket_id}: ${titulo}`,
+            //         text: `Se ha creado un nuevo ticket.\nSolicitante: ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}\nTítulo: ${titulo}\n\nVer en plataforma: /portal/tickets/${nuevoTicket._id}`,
+            //         html: `<p>Hola <strong>${admin.nombre}</strong>,</p>
+            //                <p>Se ha recibido un nuevo ticket de soporte.</p>
+            //                <ul>
+            //                 <li><strong>Ticket:</strong> #${nuevoTicket.ticket_id}</li>
+            //                 <li><strong>Solicitante:</strong> ${nuevoTicket.datos_contacto?.nombre_completo || 'Anónimo'}</li>
+            //                 <li><strong>Asunto:</strong> ${titulo}</li>
+            //                </ul>
+            //                <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${nuevoTicket._id}">Ver Ticket</a>`
+            //     }).catch(err => console.error('Error sending admin email:', err));
+            // } // DESHABILITADO TEMPORALMENTE
         }
 
         // CONFIRMACIÓN AL USUARIO (Email)
         const userEmail = datos_contacto?.email || (req.user ? req.user.email : null);
         const userName = datos_contacto?.nombre_completo || (req.user ? req.user.nombre : 'Usuario');
 
-        if (userEmail) {
-            sendEmail({
-                to: userEmail,
-                subject: `Ticket Recibido: #${nuevoTicket.ticket_id}`,
-                text: `Hola ${userName},\n\nHemos recibido tu solicitud "${titulo}".\nUn agente la revisará pronto.\n\nNúmero de Ticket: #${nuevoTicket.ticket_id}`,
-                html: `<p>Hola <strong>${userName}</strong>,</p>
-                       <p>Hemos recibido correctamente tu solicitud de soporte.</p>
-                       <p><strong>Ticket ID:</strong> #${nuevoTicket.ticket_id}</p>
-                       <p><strong>Estado:</strong> Abierto</p>
-                       <hr/>
-                       <p>Un agente revisará tu caso a la brevedad posible.</p>`
-            }).catch(err => console.error('Error sending confirmation email:', err));
-        }
+        // CONFIRMACIÓN AL USUARIO (Email)
+        // if (userEmail) {
+        //     sendEmail({
+        //         to: userEmail,
+        //         subject: `Ticket Recibido: #${nuevoTicket.ticket_id}`,
+        //         text: `Hola ${userName},\n\nHemos recibido tu solicitud "${titulo}".\nUn agente la revisará pronto.\n\nNúmero de Ticket: #${nuevoTicket.ticket_id}`,
+        //         html: `<p>Hola <strong>${userName}</strong>,</p>
+        //                <p>Hemos recibido correctamente tu solicitud de soporte.</p>
+        //                <p><strong>Ticket ID:</strong> #${nuevoTicket.ticket_id}</p>
+        //                <p><strong>Estado:</strong> Abierto</p>
+        //                <hr/>
+        //                <p>Un agente revisará tu caso a la brevedad posible.</p>`
+        //     }).catch(err => console.error('Error sending confirmation email:', err));
+        // } // DESHABILITADO TEMPORALMENTE
 
         // NOTIFICACIÓN ESPECÍFICA AL AGENTE ASIGNADO (Si es diferente al creador)
         if (agente_asignado_id && (!req.user || agente_asignado_id.toString() !== req.user.id)) {
@@ -206,7 +207,7 @@ exports.createTicket = async (req, res) => {
             });
         }
 
-        // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Creación de Ticket
+        // 📧 NOTIFICACIÓN CENTRALIZADA VIA BREVO: Creación de Ticket
         await sendTicketNotification('TICKET_CREATED', nuevoTicket);
 
         res.status(201).json(nuevoTicket);
@@ -415,7 +416,7 @@ exports.updateTicket = async (req, res) => {
                 `/portal/tickets/${actualizado._id}`
             );
 
-            // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Asignación de Agente
+            // 📧 NOTIFICACIÓN CENTRALIZADA VIA BREVO: Asignación de Agente
             await sendTicketNotification('AGENT_ASSIGNED', actualizado, {
                 agentName: actualizado.agente_id.nombre
             });
@@ -440,7 +441,7 @@ exports.updateTicket = async (req, res) => {
                 );
             }
 
-            // 📧 NOTIFICACIÓN CENTRALIZADA VIA RESEND: Cambio de Estado
+            // 📧 NOTIFICACIÓN CENTRALIZADA VIA BREVO: Cambio de Estado
             await sendTicketNotification('STATUS_CHANGED', actualizado, {
                 oldStatus: ticket.estado,
                 newStatus: req.body.estado
@@ -466,18 +467,7 @@ exports.updateTicket = async (req, res) => {
                     `/portal/tickets/${actualizado._id}`
                 );
 
-                // Email
-                if (actualizado.agente_id.email) {
-                    await sendEmail({
-                        to: actualizado.agente_id.email,
-                        subject: `⚠️ Cambio de Prioridad: Ticket #${actualizado.ticket_id}`,
-                        text: `El ticket #${actualizado.ticket_id} ha cambiado de prioridad ${ticket.prioridad} a ${req.body.prioridad}.`,
-                        html: `<p>La prioridad del ticket <strong>#${actualizado.ticket_id}</strong> ha cambiado.</p>
-                               <p><strong>Anterior:</strong> ${ticket.prioridad}</p>
-                               <p><strong>Nueva:</strong> ${req.body.prioridad}</p>
-                               <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${actualizado._id}">Ver Ticket</a>`
-                    });
-                }
+                // Email\r\n                // if (actualizado.agente_id.email) {\r\n                //     await sendEmail({\r\n                //         to: actualizado.agente_id.email,\r\n                //         subject: `⚠️ Cambio de Prioridad: Ticket #${actualizado.ticket_id}`,\r\n                //         text: `El ticket #${actualizado.ticket_id} ha cambiado de prioridad ${ticket.prioridad} a ${req.body.prioridad}.`,\r\n                //         html: `<p>La prioridad del ticket <strong>#${actualizado.ticket_id}</strong> ha cambiado.</p>\r\n                //                <p><strong>Anterior:</strong> ${ticket.prioridad}</p>\r\n                //                <p><strong>Nueva:</strong> ${req.body.prioridad}</p>\r\n                //                <a href=\"${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/tickets/${actualizado._id}\">Ver Ticket</a>`\r\n                //     });\r\n                // } // DESHABILITADO TEMPORALMENTE
             }
         }
 
